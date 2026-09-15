@@ -5,7 +5,7 @@ import datetime
 from io import BytesIO
 
 # ==========================================
-# 1. إعداد الصفحة والتصميم الاحترافي الشامل (RTL & CSS & Responsive A4)
+# 1. إعداد الصفحة والتصميم الاحترافي (RTL & CSS & Responsive A4)
 # ==========================================
 st.set_page_config(
     page_title="نظام المتابعة الصفية والإشرافية - مدارس الثغر النموذجية",
@@ -14,22 +14,16 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# كود التنسيق الجمالي المتقدم والمحاذاة التامة لليمين والطباعة A4
+# كود التنسيق الجمالي المتقدم ودعم الجوال والطباعة A4
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
 
 html, body, [class*="css"], .stApp {
     font-family: 'Tajawal', sans-serif !important;
-    direction: rtl !important;
-    text-align: right !important;
+    direction: rtl;
+    text-align: right;
     background-color: #f8fafc;
-}
-
-/* محاذاة كافة النصوص والعناوين والمدخلات لليمين */
-h1, h2, h3, h4, h5, h6, p, div, label, span, input, select, textarea {
-    text-align: right !important;
-    direction: rtl !important;
 }
 
 /* ترويسة رئيسية جذابة */
@@ -38,7 +32,7 @@ h1, h2, h3, h4, h5, h6, p, div, label, span, input, select, textarea {
     color: white;
     padding: 22px;
     border-radius: 16px;
-    text-align: center !important;
+    text-align: center;
     margin-bottom: 25px;
     box-shadow: 0 8px 20px rgba(13, 148, 136, 0.2);
 }
@@ -47,14 +41,12 @@ h1, h2, h3, h4, h5, h6, p, div, label, span, input, select, textarea {
     font-weight: 900;
     margin: 0;
     font-size: 26px;
-    text-align: center !important;
 }
 .header-box h3 {
     color: #fef08a;
     margin-top: 8px;
     font-weight: 700;
     font-size: 18px;
-    text-align: center !important;
 }
 
 /* بطاقات التنسيق الممركزة والبيانات الأساسية */
@@ -68,9 +60,9 @@ h1, h2, h3, h4, h5, h6, p, div, label, span, input, select, textarea {
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
 }
 .centered-header {
-    text-align: center !important;
+    text-align: center;
     color: #1e3a8a;
-    font-weight: 800;
+    font-weight: 700;
     margin-bottom: 20px;
     padding-bottom: 10px;
     border-bottom: 2px solid #e2e8f0;
@@ -109,13 +101,13 @@ div[data-baseweb="select"] span {
     align-items: center;
     gap: 12px;
     margin-bottom: 15px;
-    padding: 12px 18px;
+    padding: 10px 15px;
     background-color: #f1f5f9;
-    border-radius: 12px;
-    direction: rtl !important;
+    border-radius: 10px;
+    direction: rtl;
 }
 .badge-item {
-    padding: 5px 14px;
+    padding: 4px 12px;
     border-radius: 20px;
     font-weight: 700;
     font-size: 14px;
@@ -205,7 +197,7 @@ div[role="radiogroup"] {
 # ==========================================
 # 2. إنشاء قاعدة البيانات الدائمة (SQLite)
 # ==========================================
-DB_FILE = "thagher_evaluations_v6.db"
+DB_FILE = "thagher_evaluations_v7.db"
 
 def init_db():
     conn = sqlite3.connect(DB_FILE)
@@ -291,6 +283,10 @@ SEMESTERS_LIST = ["الفصل الدراسي الأول", "الفصل الدرا
 SESSIONS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة"]
 VISITS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة"]
 
+# تهيئة عداد إعادة الضبط للاستمارة الجديدة
+if 'form_reset_count' not in st.session_state:
+    st.session_state['form_reset_count'] = 0
+
 # ==========================================
 # 4. ترويسة البرنامج الرئيسية
 # ==========================================
@@ -313,45 +309,55 @@ tab1, tab2, tab3, tab4 = st.tabs([
 # ==========================================
 with tab1:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
-    st.markdown('<h2 class="centered-header">📋 البيانات الأساسية للزيارة الصفية</h2>', unsafe_allow_html=True)
     
+    col_h1, col_h2 = st.columns([3, 1])
+    with col_h1:
+        st.markdown('<h2 style="color:#1e3a8a; font-weight:800; margin:0;">📋 البيانات الأساسية للزيارة الصفية</h2>', unsafe_allow_html=True)
+    with col_h2:
+        if st.button("🔄 بدء استمارة جديدة (100 درجة)", type="secondary", use_container_width=True, key="reset_form_btn"):
+            st.session_state['form_reset_count'] += 1
+            if 'notes_input_text' in st.session_state:
+                st.session_state['notes_input_text'] = ""
+            st.rerun()
+
     teachers_data = get_all_teachers()
     teacher_names = list(teachers_data.keys())
+    
+    cnt = st.session_state['form_reset_count']
     
     # اختيار المعلم والربط الديناميكي الفوري بالتخصص والمواد
     col_top1, col_top2, col_top3 = st.columns(3)
     
     with col_top1:
-        selected_teacher = st.selectbox("اختر اسم المعلم:", teacher_names, key="eval_teacher_select_box")
+        selected_teacher = st.selectbox("اختر اسم المعلم:", teacher_names, key=f"eval_teacher_sel_{cnt}")
         teacher_info = teachers_data[selected_teacher]
         teacher_spec = teacher_info['spec']
-        # استخدام مفتاح ديناميكي يضمن تحديث حقل التخصص فور تغيير اسم المعلم
-        st.text_input("التخصص (مرتبط تلقائياً باسم المعلم):", value=teacher_spec, disabled=True, key=f"spec_input_{selected_teacher}")
+        st.text_input("التخصص (مرتبط تلقائياً باسم المعلم):", value=teacher_spec, disabled=True, key=f"spec_in_{selected_teacher}_{cnt}")
         
     with col_top2:
         subjects_list = teacher_info['subjects']
         if len(subjects_list) > 1:
-            selected_subject = st.selectbox("المادة المراد تقييمها في هذه الزيارة:", subjects_list, key=f"sub_select_{selected_teacher}")
+            selected_subject = st.selectbox("المادة المراد تقييمها في هذه الزيارة:", subjects_list, key=f"sub_sel_{selected_teacher}_{cnt}")
         else:
             selected_subject = subjects_list[0]
-            st.text_input("المادة المسندة:", value=selected_subject, disabled=True, key=f"sub_input_{selected_teacher}")
+            st.text_input("المادة المسندة:", value=selected_subject, disabled=True, key=f"sub_in_{selected_teacher}_{cnt}")
             
-        selected_semester = st.selectbox("الفصل الدراسي:", SEMESTERS_LIST, key="eval_sem_select")
+        selected_semester = st.selectbox("الفصل الدراسي:", SEMESTERS_LIST, key=f"eval_sem_sel_{cnt}")
         
     with col_top3:
-        selected_grade = st.selectbox("الصف الدراسي:", list(GRADE_CLASSES_MAP.keys()), key="eval_g_select")
+        selected_grade = st.selectbox("الصف الدراسي:", list(GRADE_CLASSES_MAP.keys()), key=f"eval_g_sel_{cnt}")
         available_classes = GRADE_CLASSES_MAP[selected_grade]
-        selected_class = st.selectbox("الفصل:", available_classes, key=f"class_select_{selected_grade}")
+        selected_class = st.selectbox("الفصل:", available_classes, key=f"class_sel_{selected_grade}_{cnt}")
         
     col_sub1, col_sub2 = st.columns(2)
     with col_sub1:
-        selected_session = st.selectbox("الحصة الدراسية:", SESSIONS_LIST, key="eval_sess_select")
+        selected_session = st.selectbox("الحصة الدراسية:", SESSIONS_LIST, key=f"eval_sess_sel_{cnt}")
     with col_sub2:
-        selected_visit = st.selectbox("رقم الزيارة:", VISITS_LIST, key="eval_v_select")
-        today_date = st.date_input("التاريخ (ميلادي):", datetime.date.today(), key="eval_date_select")
+        selected_visit = st.selectbox("رقم الزيارة:", VISITS_LIST, key=f"eval_v_sel_{cnt}")
+        today_date = st.date_input("التاريخ (ميلادي):", datetime.date.today(), key=f"eval_date_sel_{cnt}")
 
     st.markdown("---")
-    st.markdown('<h3>🎯 عناصر التقييم الصفي الـ 20 (احتساب من 100 درجة - 5 درجات لكل بند)</h3>', unsafe_allow_html=True)
+    st.markdown('<h3>🎯 عناصر التقييم الصفي الـ 20 (افتراضياً 5 درجات لكل بند = 100/100)</h3>', unsafe_allow_html=True)
     
     st.markdown("""
     <div class="badge-container">
@@ -417,12 +423,13 @@ with tab1:
         with col_t3:
             st.markdown(f"<div style='text-align:right; padding-top:8px; color:#1e293b; line-height:1.5;'>{item['text']}</div>", unsafe_allow_html=True)
         with col_t4:
+            # افتراضياً على الخيار رقم 5 (متميز - index 4) لتظهر الدرجة كاملة 100/100
             scores[item['id']] = st.radio(
                 f"الدرجة {item['num']}",
                 options=[1, 2, 3, 4, 5],
-                index=4,
+                index=4, # الخيار رقم 5 بشكل افتراضي كامل
                 horizontal=True,
-                key=f"radio_v6_{item['id']}",
+                key=f"radio_item_{item['id']}_cnt_{cnt}",
                 label_visibility="collapsed"
             )
         st.markdown("<hr style='margin: 3px 0; border: 0.5px solid #f1f5f9;'>", unsafe_allow_html=True)
@@ -438,7 +445,7 @@ with tab1:
     </div>
     """, unsafe_allow_html=True)
 
-    notes_input = st.text_area("توصيات وملحوظات المشرف الزائر:", key="notes_v6_input")
+    notes_input = st.text_area("توصيات وملحوظات المشرف الزائر:", key=f"notes_input_text_{cnt}")
 
     st.markdown("---")
     st.subheader("✍️ الاعتمادات والتوقيعات الرسمية")
@@ -476,9 +483,9 @@ with tab1:
     
     col_save_btn1, col_save_btn2 = st.columns(2)
     with col_save_btn1:
-        submit_save = st.button("💾 حفظ استمارة التقييم الحالية (من 100)", type="primary", use_container_width=True, key="save_eval_v6")
+        submit_save = st.button("💾 حفظ استمارة التقييم الحالية (من 100)", type="primary", use_container_width=True, key=f"save_eval_btn_{cnt}")
     with col_save_btn2:
-        if st.button("🖨️ طباعة الاستمارة مباشرة (A4)", type="secondary", use_container_width=True, key="print_eval_v6"):
+        if st.button("🖨️ طباعة الاستمارة مباشرة (A4)", type="secondary", use_container_width=True, key=f"print_eval_btn_{cnt}"):
             st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
 
     if submit_save:
@@ -503,6 +510,9 @@ with tab1:
         conn.commit()
         conn.close()
         st.success(f"✅ تم حفظ استمارة تقييم المعلم ({selected_teacher}) للتخصص ({teacher_spec}) بنجاح! المجموع: {total_val} من 100.")
+        # تعيين استمارة جديدة فارغة ومحددة على 100 درجات تلقائياً بعد الحفظ
+        st.session_state['form_reset_count'] += 1
+        st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
@@ -519,14 +529,14 @@ with tab2:
     if t_list:
         col_f1, col_f2, col_f3 = st.columns(3)
         with col_f1:
-            search_teacher = st.selectbox("اختر اسم المعلم:", t_list, key="search_t_tab2_v6")
+            search_teacher = st.selectbox("اختر اسم المعلم:", t_list, key="search_t_tab2_v7")
         with col_f2:
-            search_visit = st.selectbox("اختر رقم الزيارة:", VISITS_LIST, key="search_v_tab2_v6")
+            search_visit = st.selectbox("اختر رقم الزيارة:", VISITS_LIST, key="search_v_tab2_v7")
         with col_f3:
             st.markdown("<br>", unsafe_allow_html=True)
-            btn_start = st.button("🚀 ابدأ البحث", type="primary", use_container_width=True, key="btn_search_tab2_v6")
+            btn_start = st.button("🚀 ابدأ البحث", type="primary", use_container_width=True, key="btn_search_tab2_v7")
 
-        if btn_start or st.session_state.get('last_searched_id_v6'):
+        if btn_start or st.session_state.get('last_searched_id_v7'):
             conn = sqlite3.connect(DB_FILE)
             df_search = pd.read_sql_query(
                 "SELECT * FROM evaluations WHERE teacher_name = ? AND visit_num = ? ORDER BY id DESC LIMIT 1", 
@@ -537,59 +547,64 @@ with tab2:
             if not df_search.empty:
                 rec = df_search.iloc[0]
                 rec_id = int(rec['id'])
-                st.session_state['last_searched_id_v6'] = rec_id
+                st.session_state['last_searched_id_v7'] = rec_id
                 
-                # عرض البطاقة الرسمية للطباعة
-                st.markdown(f"""
-                    <div style="border: 2px solid #1e3a8a; border-radius:12px; padding:20px; background-color:#ffffff; direction:rtl; text-align:right;">
-                        <h2 style="text-align:center !important; color:#1e3a8a; font-weight:900;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
-                        <h3 style="text-align:center !important; color:#0d9488; font-weight:700;">بطاقة تقييم الأداء الصفي والزيارة الإشرافية (20 بنداً - 100 درجة)</h3>
-                        <hr style="border-top: 2px solid #0d9488;">
-                        
-                        <table style="width:100%; text-align:right; font-size:15px; line-height:2; direction:rtl;">
-                            <tr>
-                                <td><b>اسم المعلم:</b> {rec['teacher_name']}</td>
-                                <td><b>التخصص:</b> {rec['specialization']}</td>
-                                <td><b>المادة المزارة:</b> {rec['selected_subject']}</td>
-                            </tr>
-                            <tr>
-                                <td><b>الصف:</b> {rec['grade']}</td>
-                                <td><b>الفصل:</b> {rec['class_name']}</td>
-                                <td><b>الفصل الدراسي:</b> {rec.get('semester', 'الأول')}</td>
-                            </tr>
-                            <tr>
-                                <td><b>الحصة:</b> {rec['session_num']}</td>
-                                <td><b>رقم الزيارة:</b> {rec['visit_num']}</td>
-                                <td><b>التاريخ:</b> {rec['eval_date']}</td>
-                            </tr>
-                        </table>
-                        <hr>
-                        <h4 style="color:#1e3a8a;">📊 ملخص التقييم الكلي:</h4>
-                        <p><b>المجموع الكلي:</b> <span style="font-size:22px; color:#16a34a; font-weight:bold;">{rec['total_score']} / 100</span> ({(int(rec['total_score'])):.1f}%)</p>
-                        <p style="margin-top:10px;"><b>التوصيات والملحوظات:</b> {rec['notes'] if rec['notes'] else 'لا يوجد'}</p>
-                        <hr>
-                        <table style="width:100%; text-align:center; margin-top:20px; direction:rtl;">
-                            <tr>
-                                <td><b>المعلم المطلع:</b><br>{rec['signed_teacher']}<br>__________________</td>
-                                <td><b>وكيل الشؤون التعليمية:</b><br>{rec.get('signed_vp', 'محمد مبروك محمد السيد')}<br>__________________</td>
-                                <td><b>مدير المدرسة:</b><br>{rec.get('signed_principal', 'إبراهيم بن موسى التميمي')}<br>__________________</td>
-                            </tr>
-                        </table>
-                    </div>
+                # عرض بطاقة الاستمارة المسترجعة بشكل برمجى نظيف ودون أي تسريب لأكواد HTML
+                st.markdown("""
+                <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:22px; background-color:#ffffff; direction:rtl; text-align:right;">
+                    <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin-bottom:5px;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
+                    <h4 style="text-align:center; color:#0d9488; font-weight:700; margin-top:0;">بطاقة تقييم الأداء الصفي والزيارة الإشرافية (20 بنداً - 100 درجة)</h4>
+                    <hr style="border-top: 2px solid #0d9488; margin: 15px 0;">
+                </div>
                 """, unsafe_allow_html=True)
+
+                # عرض تفاصيل البيانات الأساسية باستخدام أعمدة Streamlit النظيفة بدلاً من جداول HTML المعقدة
+                col_info1, col_info2, col_info3 = st.columns(3)
+                with col_info1:
+                    st.write(f"👤 **اسم المعلم:** {rec['teacher_name']}")
+                    st.write(f"🏫 **الصف:** {rec['grade']}")
+                    st.write(f"⏱️ **الحصة:** {rec['session_num']}")
+                with col_info2:
+                    st.write(f"📌 **التخصص:** {rec['specialization']}")
+                    st.write(f"🚪 **الفصل:** {rec['class_name']}")
+                    st.write(f"🔢 **رقم الزيارة:** {rec['visit_num']}")
+                with col_info3:
+                    st.write(f"📘 **المادة المزارة:** {rec['selected_subject']}")
+                    st.write(f"📅 **الفصل الدراسي:** {rec.get('semester', 'الأول')}")
+                    st.write(f"📆 **التاريخ:** {rec['eval_date']}")
+
+                st.markdown("---")
+                st.markdown(f"""
+                <div style="background-color:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:12px; text-align:right;">
+                    <h4 style="color:#166534; margin:0;">📊 ملخص التقييم النهائي:</h4>
+                    <p style="font-size:20px; font-weight:800; color:#15803d; margin:5px 0 0 0;">المجموع الكلي: {rec['total_score']} من 100 درجات ({(int(rec['total_score'])):.1f}%)</p>
+                    <p style="color:#334155; margin-top:8px;"><b>التوصيات والملحوظات:</b> {rec['notes'] if rec['notes'] else 'لا يوجد'}</p>
+                </div>
+                """, unsafe_allow_html=True)
+
+                st.markdown("<br>", unsafe_allow_html=True)
                 
+                # الاعتمادات الرسمية للتوقيع
+                col_s1, col_s2, col_s3 = st.columns(3)
+                with col_s1:
+                    st.markdown(f"**المعلم المطلع:**\n\n{rec['signed_teacher']}\n\n__________________")
+                with col_s2:
+                    st.markdown(f"**وكيل الشؤون التعليمية:**\n\n{rec.get('signed_vp', 'محمد مبروك محمد السيد')}\n\n__________________")
+                with col_s3:
+                    st.markdown(f"**مدير المدرسة:**\n\n{rec.get('signed_principal', 'إبراهيم بن موسى التميمي')}\n\n__________________")
+
                 st.markdown("<br>", unsafe_allow_html=True)
                 col_act1, col_act2, col_act3 = st.columns(3)
                 
                 with col_act1:
-                    if st.button("🖨️ طباعة الاستمارة المسترجعة (A4)", type="secondary", use_container_width=True, key="print_rec_btn_v6"):
+                    if st.button("🖨️ طباعة الاستمارة (A4)", type="secondary", use_container_width=True, key="print_rec_btn_v7"):
                         st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
                 
                 with col_act2:
-                    show_edit = st.button("✏️ تعديل هذه الاستمارة", type="primary", use_container_width=True, key="btn_show_edit_v6")
+                    show_edit = st.button("✏️ تعديل هذه الاستمارة", type="primary", use_container_width=True, key="btn_show_edit_v7")
                 
                 with col_act3:
-                    show_delete = st.button("🗑️ حذف هذه الاستمارة", type="primary", use_container_width=True, key="btn_show_del_v6")
+                    show_delete = st.button("🗑️ حذف هذه الاستمارة", type="primary", use_container_width=True, key="btn_show_del_v7")
 
                 # إجراء الحذف
                 if show_delete:
@@ -598,17 +613,17 @@ with tab2:
                     c.execute("DELETE FROM evaluations WHERE id = ?", (rec_id,))
                     conn.commit()
                     conn.close()
-                    st.success("✅ تم حذف الاستمارة بنجاح من قاعدة البيانات!")
-                    st.session_state.pop('last_searched_id_v6', None)
+                    st.success("✅ تم حذف استمارة التقييم بنجاح من قاعدة البيانات!")
+                    st.session_state.pop('last_searched_id_v7', None)
                     st.rerun()
 
                 # إجراء التعديل
-                if show_edit or st.session_state.get(f'editing_v6_{rec_id}'):
-                    st.session_state[f'editing_v6_{rec_id}'] = True
+                if show_edit or st.session_state.get(f'editing_v7_{rec_id}'):
+                    st.session_state[f'editing_v7_{rec_id}'] = True
                     st.markdown("---")
                     st.subheader("✏️ نموذج تعديل الاستمارة")
                     
-                    with st.form(f"edit_form_v6_{rec_id}"):
+                    with st.form(f"edit_form_v7_{rec_id}"):
                         new_notes = st.text_area("التوصيات والملحوظات الجديدة:", value=rec['notes'])
                         new_total = st.number_input("المجموع الكلي المعدل (من 100):", min_value=0, max_value=100, value=int(rec['total_score']))
                         save_changes = st.form_submit_button("💾 حفظ التعديلات", type="primary")
@@ -620,7 +635,7 @@ with tab2:
                             conn.commit()
                             conn.close()
                             st.success("✅ تم تحديث بيانات الاستمارة بنجاح!")
-                            st.session_state.pop(f'editing_v6_{rec_id}', None)
+                            st.session_state.pop(f'editing_v7_{rec_id}', None)
                             st.rerun()
             else:
                 st.warning("⚠️ لم يتم العثور على استمارة تقييم مسجلة لهذا المعلم في الزيارة المحددة.")
@@ -636,7 +651,7 @@ with tab3:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
     st.subheader("➕ إضافة معلم جديد إلى قائمة النظام")
     
-    with st.form("add_teacher_form_v6", clear_on_submit=True):
+    with st.form("add_teacher_form_v7", clear_on_submit=True):
         col_t1, col_t2, col_t3 = st.columns(3)
         with col_t1:
             new_t_name = st.text_input("اسم المعلم الثلاثي/الرباعي:")
@@ -705,7 +720,7 @@ with tab4:
             )
             
         with col_exp2:
-            if st.button("🖨️ طباعة وتصدير التقرير الكلي (PDF)", use_container_width=True, key="print_all_btn_v6"):
+            if st.button("🖨️ طباعة وتصدير التقرير الكلي (PDF)", use_container_width=True, key="print_all_btn_v7"):
                 st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
     else:
         st.info("ℹ️ لا توجد بيانات مسجلة في قاعدة البيانات حتى الآن.")
