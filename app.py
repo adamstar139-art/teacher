@@ -87,12 +87,12 @@ div[data-baseweb="select"] span {
 }
 
 /* مدخلات النصوص والتواريخ */
-.stTextInput input, .stDateInput input {
+.stTextInput input, .stDateInput input, .stTextArea textarea {
     border-radius: 10px !important;
     border: 1.5px solid #cbd5e1 !important;
     font-family: 'Tajawal', sans-serif !important;
 }
-.stTextInput input:focus, .stDateInput input:focus {
+.stTextInput input:focus, .stDateInput input:focus, .stTextArea textarea:focus {
     border-color: #0d9488 !important;
 }
 
@@ -124,11 +124,24 @@ div[data-baseweb="select"] span {
     font-size: 14px;
 }
 
-/* جدول عناصر التقييم الصفي الميمز (مطابق للصورة تماماً) */
+/* عناوين المجالات */
+.domain-header {
+    background: linear-gradient(90deg, #1e3a8a 0%, #3b82f6 100%);
+    color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    font-weight: 800;
+    font-size: 16px;
+    margin-top: 20px;
+    margin-bottom: 10px;
+}
+
+/* جدول عناصر التقييم الصفي (مطابق للصورة تماماً) */
 .eval-table {
     width: 100%;
     border-collapse: collapse;
-    margin-top: 15px;
+    margin-top: 10px;
+    margin-bottom: 15px;
     background-color: #ffffff;
     border-radius: 12px;
     overflow: hidden;
@@ -137,27 +150,14 @@ div[data-baseweb="select"] span {
 .eval-table th {
     background-color: #eff6ff;
     color: #1e3a8a;
-    padding: 14px;
+    padding: 12px;
     font-weight: 800;
     font-size: 15px;
     border-bottom: 2px solid #dbeafe;
     text-align: center;
 }
-.eval-table td {
-    padding: 12px 14px;
-    border-bottom: 1px solid #f1f5f9;
-    color: #334155;
-    font-size: 14px;
-}
-.domain-cell {
-    font-weight: 800;
-    color: #1e3a8a;
-    vertical-align: middle;
-    text-align: center;
-    background-color: #f8fafc;
-}
 
-/* تحسين زر الاستمارة والأزرار الرئيسية */
+/* تحسين الأزرار */
 .stButton button {
     border-radius: 10px !important;
     font-weight: 700 !important;
@@ -170,11 +170,10 @@ div[data-baseweb="select"] span {
     .header-box h1 { font-size: 20px; }
     .header-box h3 { font-size: 15px; }
     .centered-card { padding: 15px; }
-    .eval-table th, .eval-table td { padding: 8px 6px; font-size: 12px; }
     div[data-testid="column"] { width: 100% !important; margin-bottom: 10px; }
 }
 
-/* التنسيق المخصص للطباعة بحجم ورقة A4 exact portrait */
+/* الطباعة بحجم ورقة A4 exact portrait */
 @media print {
     @page {
         size: A4 portrait;
@@ -203,61 +202,16 @@ div[data-baseweb="select"] span {
         padding: 15px !important;
         border-radius: 8px !important;
     }
-    .eval-table th {
-        background-color: #e2e8f0 !important;
-        color: black !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-    }
 }
 </style>
 """, unsafe_allow_html=True)
 
 # ==========================================
-# 2. إنشاء قاعدة البيانات الدائمة (SQLite)
+# 2. إنشاء واستعلام قاعدة البيانات الدائمة (SQLite)
 # ==========================================
 DB_FILE = "thagher_evaluations.db"
 
-def init_db():
-    conn = sqlite3.connect(DB_FILE)
-    c = conn.cursor()
-    c.execute('''
-        CREATE TABLE IF NOT EXISTS evaluations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            teacher_name TEXT,
-            specialization TEXT,
-            assigned_subjects TEXT,
-            grade TEXT,
-            class_name TEXT,
-            semester TEXT,
-            session_num TEXT,
-            visit_num TEXT,
-            eval_date TEXT,
-            q1_score INTEGER,
-            q2_score INTEGER,
-            q3_score INTEGER,
-            q4_score INTEGER,
-            q5_score INTEGER,
-            q6_score INTEGER,
-            q7_score INTEGER,
-            q8_score INTEGER,
-            total_score INTEGER,
-            notes TEXT,
-            signed_teacher TEXT,
-            signed_admin TEXT,
-            admin_title TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    conn.commit()
-    conn.close()
-
-init_db()
-
-# ==========================================
-# 3. البيانات الأساسية والربط بين الصفوف والفصول
-# ==========================================
-TEACHERS_DATA = {
+DEFAULT_TEACHERS = {
     "محمد سامي السعيد": {"spec": "مهارات رقمية", "subjects": "مهارات رقمية"},
     "علي محمد معوض": {"spec": "علوم", "subjects": "علوم"},
     "أحمد عبد الحميد سعيد": {"spec": "علوم", "subjects": "علوم"},
@@ -273,21 +227,110 @@ TEACHERS_DATA = {
     "زيد بن علي التميمي": {"spec": "شريعة اسلامية", "subjects": "اسلامية"}
 }
 
+def init_db():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS teachers (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT UNIQUE,
+            specialization TEXT,
+            assigned_subjects TEXT
+        )
+    """)
+    
+    c.execute("SELECT COUNT(*) FROM teachers")
+    if c.fetchone()[0] == 0:
+        for name, info in DEFAULT_TEACHERS.items():
+            c.execute("INSERT OR IGNORE INTO teachers (name, specialization, assigned_subjects) VALUES (?, ?, ?)",
+                      (name, info['spec'], info['subjects']))
+    
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS evaluations (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            teacher_name TEXT,
+            specialization TEXT,
+            assigned_subjects TEXT,
+            grade TEXT,
+            class_name TEXT,
+            semester TEXT,
+            session_num TEXT,
+            visit_num TEXT,
+            eval_date TEXT,
+            q1_score INTEGER, q2_score INTEGER, q3_score INTEGER, q4_score INTEGER,
+            q5_score INTEGER, q6_score INTEGER, q7_score INTEGER, q8_score INTEGER,
+            q9_score INTEGER, q10_score INTEGER, q11_score INTEGER, q12_score INTEGER,
+            q13_score INTEGER, q14_score INTEGER, q15_score INTEGER, q16_score INTEGER,
+            q17_score INTEGER, q18_score INTEGER, q19_score INTEGER, q20_score INTEGER,
+            total_score INTEGER,
+            notes TEXT,
+            signed_teacher TEXT,
+            signed_admin TEXT,
+            admin_title TEXT,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+    """)
+    conn.commit()
+    conn.close()
+
+init_db()
+
+def get_teachers_dict():
+    conn = sqlite3.connect(DB_FILE)
+    c = conn.cursor()
+    c.execute("SELECT name, specialization, assigned_subjects FROM teachers ORDER BY name ASC")
+    rows = c.fetchall()
+    conn.close()
+    return {r[0]: {"spec": r[1], "subjects": r[2]} for r in rows}
+
 ADMIN_DATA = [
     {"name": "ابراهيم بن موسى التميمي", "title": "مدير المدرسة"},
     {"name": "محمد مبروك محمد السيد", "title": "وكيل الشؤون التعليمية"}
 ]
 
-# الربط الديناميكي بين الصفوف والفصول (المطلب الخامس)
+# الربط الديناميكي بين الصفوف والفصول
 GRADE_CLASSES_MAP = {
     "الأول المتوسط": ["1/1", "1/2"],
     "الثاني المتوسط": ["2/1", "2/2", "2/3"],
     "الثالث المتوسط": ["3/1", "3/2", "3/3"]
 }
 
-SEMESTERS_LIST = ["الفصل الدراسي الأول", "الفصل الدراسي الثاني", "الفصل الدراسي الثالث"]
+# حذف الفصل الدراسي الثالث - يتبقى الفصل الأول والثاني فقط
+SEMESTERS_LIST = ["الفصل الدراسي الأول", "الفصل الدراسي الثاني"]
 SESSIONS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة"]
 VISITS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة"]
+
+# ==========================================
+# 3. البنود الـ 20 المقسمة بحسب المجالات الرسمية
+# ==========================================
+RUBRIC_ITEMS = [
+    # مجال التخطيط (1-4)
+    {"id": "q1", "domain": "التخطيط", "num": 1, "text": "يخطط المعلم/ة للدرس على المنصة تخطيطا متوافقا مع الخطة الفصلية للمقرر."},
+    {"id": "q2", "domain": "التخطيط", "num": 2, "text": "متابعة الواجبات المنزلية وتقديم التغذية الراجعة لها."},
+    {"id": "q3", "domain": "التخطيط", "num": 3, "text": "ادارة مشاركة الطالب/ة الصوتية والمكتوبة بكفاءة."},
+    {"id": "q4", "domain": "التخطيط", "num": 4, "text": "متابعة الطالب/ة وتسجيل الحضور ورصد حالات الغياب في المنصة أو الصف."},
+    
+    # مجال التعلم والتعليم (5-15)
+    {"id": "q5", "domain": "التعلم والتعليم", "num": 5, "text": "ينفذ المعلم/ة إجراءات الدرس وفق خارطة سير الدرس (التمهيد، أنشطة التعلم والتقويم، التقويم الختامي)."},
+    {"id": "q6", "domain": "التعلم والتعليم", "num": 6, "text": "الالتزام باللغة العربية الفصحى عند طرح الأسئلة الصفية."},
+    {"id": "q7", "domain": "التعلم والتعليم", "num": 7, "text": "يطبق المعلم/ة إستراتيجيات تدريس تراعي قدرات المتعلمين والفروق الفردية بينهم وتتسق مع الموقف التعليمي."},
+    {"id": "q8", "domain": "التعلم والتعليم", "num": 8, "text": "يستخدم المعلم/ة أساليب تحفيز تعزز الدافعية لدى المتعلمين."},
+    {"id": "q9", "domain": "التعلم والتعليم", "num": 9, "text": "ينخرط المتعلمون في أنشطة تعلم متنوعة ومتمايزة ويجيبون عن أسئلة صفية تنمي مهارات التفكير العليا."},
+    {"id": "q10", "domain": "التعلم والتعليم", "num": 10, "text": "يحصل المتعلمون على تغذية راجعة تركز على تحسن أدائهم وفق الموقف التعليمي."},
+    {"id": "q11", "domain": "التعلم والتعليم", "num": 11, "text": "يمارس المتعلمون أنشطة أدائية تقيس مدى فهمهم وتمكنهم من المهارات (أنشطة كتابية/ ملفات/ مطويات/ أوراق عمل/ مجسمات /تجارب عملية، إلخ)."},
+    {"id": "q12", "domain": "التعلم والتعليم", "num": 12, "text": "يستخدم المتعلمون أدوات رقمية لجمع المعلومات ويوظفونها في عملية التعلم."},
+    {"id": "q13", "domain": "التعلم والتعليم", "num": 13, "text": "يربط المتعلمون أنشطة التعلم بتطبيقات عملية من واقع الحياة."},
+    {"id": "q14", "domain": "التعلم والتعليم", "num": 14, "text": "يظهر المتعلمون تمكنا من مهارات القراءة والكتابة والحساب، وينمون ثروتهم اللغوية."},
+    {"id": "q15", "domain": "التعلم والتعليم", "num": 15, "text": "يتمكن المتعلمون من المعارف والمهارات في المقرر الدراسي بنسبة ما لا يقل عن 85% (اختبار الوحدات والمقننة - اختبار الفترة – الاختبار النهائي)."},
+    
+    # مجال الشخصية المتوازنة (16-20)
+    {"id": "q16", "domain": "الشخصية المتوازنة", "num": 16, "text": "يتمثل المتعلمون القيم الإسلامية والمواطنة والسلوك الصفي الحسن."},
+    {"id": "q17", "domain": "الشخصية المتوازنة", "num": 17, "text": "يتحمل المتعلمون مسؤولية تعلمهم ويمارسون التوجه الذاتي (القيادة، التنسيق. الخ) – الصف المقلوب."},
+    {"id": "q18", "domain": "الشخصية المتوازنة", "num": 18, "text": "يشارك المتعلمون في أنشطة جماعية ويعملون بروح الفريق ويسود الاحترام المتبادل والتعاطف بينهم."},
+    {"id": "q19", "domain": "الشخصية المتوازنة", "num": 19, "text": "يبادر المتعلمون للتعبير عن أفكارهم وآرائهم بثقة ووضوح في بيئة التعلم."},
+    {"id": "q20", "domain": "الشخصية المتوازنة", "num": 20, "text": "القدرة على إدارة وضبط النظام داخل الصف وفق القواعد التنظيمية."}
+]
 
 # ==========================================
 # 4. ترويسة البرنامج الرئيسية
@@ -299,9 +342,10 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-tab1, tab2, tab3 = st.tabs([
+tab1, tab2, tab3, tab4 = st.tabs([
     "📝 استمارة تقييم جديدة",
-    "🔍 استرجاع وطباعة استمارة معلم",
+    "🔍 استرجاع وتعديل / حذف استمارة",
+    "➕ إضافة معلم جديد",
     "📊 التقارير العامة (Excel / PDF)"
 ])
 
@@ -312,36 +356,37 @@ with tab1:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
     st.markdown('<h2 class="centered-header">📋 البيانات الأساسية للزيارة الصفية</h2>', unsafe_allow_html=True)
     
-    with st.form("evaluation_form", clear_on_submit=False):
-        # الجزء الأول: البيانات الأساسية في الوسط
+    teachers_dict = get_teachers_dict()
+    teacher_names = list(teachers_dict.keys())
+    
+    if not teacher_names:
+        st.warning("⚠️ لا يوجد معلمون مسجلون. يرجى إضافة معلم من تبويب (➕ إضافة معلم جديد).")
+    else:
+        # الربط الديناميكي الفوري خارج st.form لضمان تحديث قائمة الفصول تلقائياً فور اختيار الصف
         col1, col2, col3 = st.columns(3)
         
         with col1:
-            selected_teacher = st.selectbox("اختر اسم المعلم:", list(TEACHERS_DATA.keys()))
-            teacher_info = TEACHERS_DATA[selected_teacher]
-            st.text_input("التخصص (تلقائي):", value=teacher_info['spec'], disabled=True)
-            st.text_input("المواد المسندة:", value=teacher_info['subjects'], disabled=True)
+            selected_teacher = st.selectbox("اختر اسم المعلم:", teacher_names, key="main_teacher_sel")
+            teacher_info = teachers_dict[selected_teacher]
+            st.text_input("التخصص (تلقائي):", value=teacher_info['spec'], disabled=True, key="spec_dis")
+            st.text_input("المواد المسندة:", value=teacher_info['subjects'], disabled=True, key="subj_dis")
             
         with col2:
-            # الصف الدراسي والفصل الدراسي
-            selected_grade = st.selectbox("الصف الدراسي:", list(GRADE_CLASSES_MAP.keys()))
-            # الربط التلقائي للفصول بالصف المختار
+            selected_grade = st.selectbox("الصف الدراسي:", list(GRADE_CLASSES_MAP.keys()), key="main_grade_sel")
+            # الربط التلقائي الحقيقي: اختيار الصف يحدد فصول ذلك الصف فقط
             available_classes = GRADE_CLASSES_MAP[selected_grade]
-            selected_class = st.selectbox("الفصل:", available_classes)
-            # إضافة قائمة اختيار الفصل الدراسي الأول أو الثاني
-            selected_semester = st.selectbox("الفصل الدراسي:", SEMESTERS_LIST)
+            selected_class = st.selectbox("الفصل:", available_classes, key="main_class_sel")
+            selected_semester = st.selectbox("الفصل الدراسي:", SEMESTERS_LIST, key="main_sem_sel")
             
         with col3:
-            selected_session = st.selectbox("الحصة الدراسية:", SESSIONS_LIST)
-            selected_visit = st.selectbox("رقم الزيارة:", VISITS_LIST)
-            today_date = st.date_input("التاريخ (ميلادي):", datetime.date.today())
+            selected_session = st.selectbox("الحصة الدراسية:", SESSIONS_LIST, key="main_sess_sel")
+            selected_visit = st.selectbox("رقم الزيارة:", VISITS_LIST, key="main_vis_sel")
+            today_date = st.date_input("التاريخ (ميلادي):", datetime.date.today(), key="main_date_sel")
 
         st.markdown("---")
+        st.markdown('<h3>🎯 بنود التقييم الـ 20 ومستويات الأداء (من 1 إلى 4)</h3>', unsafe_allow_html=True)
         
-        # الجزء الثاني: استمارة التقييم بنفس شكل الصورة في المصادر
-        st.markdown('<h3>🎯 عناصر التقييم ومستويات الأداء</h3>', unsafe_allow_html=True)
-        
-        # شريط الدلالات (مطابق للصورة تماماً)
+        # شريط الدلالات (مطابق للصورة)
         st.markdown("""
         <div class="badge-container">
             <span style="font-weight:700; color:#1e3a8a; margin-left:15px;">عناصر التقييم:</span>
@@ -350,197 +395,271 @@ with tab1:
         </div>
         """, unsafe_allow_html=True)
         
-        # بنود التقييم المطابقة للصورة
-        rubric_items = [
-            {"id": "q1", "domain": "التخطيط", "num": 1, "text": "يخطط المعلم/ة للدرس على المنصة تخطيطا متوافقا مع الخطة الفصلية للمقرر."},
-            {"id": "q2", "domain": "التخطيط", "num": 2, "text": "متابعة الواجبات المنزلية وتقديم التغذية الراجعة لها."},
-            {"id": "q3", "domain": "التخطيط", "num": 3, "text": "ادارة مشاركة الطالب/ة الصوتية والمكتوبة بكفاءة."},
-            {"id": "q4", "domain": "التخطيط", "num": 4, "text": "متابعة الطالب/ة وتسجيل الحضور ورصد حالات الغياب في المنصة أو الصف."},
-            {"id": "q5", "domain": "التنفيذ والتمهيد", "num": 5, "text": "التمهيد واستثارة دافعية الطلاب ومراعاة الفروق الفردية."},
-            {"id": "q6", "domain": "التنفيذ والتمهيد", "num": 6, "text": "استخدام الوسائل والتقنيات التعليمية واستراتيجيات التدريس الحديثة."},
-            {"id": "q7", "domain": "إدارة الصف والتقويم", "num": 7, "text": "إدارة وقت الحصة وحسن الانضباط والتفاعل الإيجابي."},
-            {"id": "q8", "domain": "إدارة الصف والتقويم", "num": 8, "text": "التقييم المستمر ومعالجة الأخطاء وتنفيذ الأنشطة الصفية."}
-        ]
-        
-        scores = {}
-        
-        # عرض الجدول التفاعلي بنفس هيئة وتنسيق الصورة
-        st.markdown("""
-        <table class="eval-table">
-            <thead>
-                <tr>
-                    <th style="width: 15%;">المجال</th>
-                    <th style="width: 8%;">م</th>
-                    <th style="width: 52%;">عناصر التقييم</th>
-                    <th style="width: 25%;">مستويات الأداء (1 - 4)</th>
-                </tr>
-            </thead>
-        </table>
-        """, unsafe_allow_html=True)
-        
-        for item in rubric_items:
-            col_t1, col_t2, col_t3, col_t4 = st.columns([1.5, 0.8, 5.2, 2.5])
-            with col_t1:
-                st.markdown(f"<div style='text-align:center; font-weight:700; color:#1e3a8a; padding-top:10px;'>{item['domain']}</div>", unsafe_allow_html=True)
-            with col_t2:
-                st.markdown(f"<div style='text-align:center; font-weight:700; padding-top:10px;'>{item['num']}</div>", unsafe_allow_html=True)
-            with col_t3:
-                st.markdown(f"<div style='padding-top:10px; color:#1e293b;'>{item['text']}</div>", unsafe_allow_html=True)
-            with col_t4:
-                scores[item['id']] = st.radio(
-                    f"الدرجة {item['num']}",
-                    options=[1, 2, 3, 4],
-                    index=3,
-                    horizontal=True,
-                    key=f"radio_{item['id']}",
-                    label_visibility="collapsed"
-                )
-            st.markdown("<hr style='margin: 4px 0; border: 0.5px solid #f1f5f9;'>", unsafe_allow_html=True)
-
-        total_val = sum(scores.values())
-        max_val = len(rubric_items) * 4
-        
-        st.markdown(f"""
-        <div style="background-color:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:15px; text-align:center; margin-top:20px;">
-            <span style="font-size:18px; font-weight:800; color:#166534;">💡 المجموع الكلي لدرجات التقييم الصفي: {total_val} من {max_val}</span>
-        </div>
-        """, unsafe_allow_html=True)
-
-        notes_input = st.text_area("توصيات وملحوظات المشرف الزائر:")
-
-        st.markdown("---")
-        st.subheader("✍️ التوقيعات والاعتماد الرسمي")
-        
-        col_s1, col_s2 = st.columns(2)
-        with col_s1:
-            sign_teacher = st.selectbox("اسم المعلم المطلع:", list(TEACHERS_DATA.keys()), index=list(TEACHERS_DATA.keys()).index(selected_teacher))
-            st.caption("توقيع المعلم: ______________________")
+        with st.form("evaluation_form", clear_on_submit=False):
+            scores = {}
+            current_domain = ""
             
-        with col_s2:
-            admin_options = [f"{a['title']}: {a['name']}" for a in ADMIN_DATA]
-            admin_choice = st.selectbox("الاعتماد الإداري:", admin_options)
-            admin_title_part, admin_name_part = admin_choice.split(": ")
-            st.caption(f"توقيع {admin_title_part}: ______________________")
+            for item in RUBRIC_ITEMS:
+                if item['domain'] != current_domain:
+                    current_domain = item['domain']
+                    st.markdown(f'<div class="domain-header">📌 مجال: {current_domain}</div>', unsafe_allow_html=True)
+                    st.markdown("""
+                    <table class="eval-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%;">م</th>
+                                <th style="width: 65%;">عناصر التقييم</th>
+                                <th style="width: 27%;">مستويات الأداء (1 - 4)</th>
+                            </tr>
+                        </thead>
+                    </table>
+                    """, unsafe_allow_html=True)
 
-        st.markdown("<br>", unsafe_allow_html=True)
-        
-        col_btn1, col_btn2 = st.columns(2)
-        with col_btn1:
+                col_t2, col_t3, col_t4 = st.columns([0.8, 6.5, 2.7])
+                with col_t2:
+                    st.markdown(f"<div style='text-align:center; font-weight:700; padding-top:10px;'>{item['num']}</div>", unsafe_allow_html=True)
+                with col_t3:
+                    st.markdown(f"<div style='padding-top:10px; color:#1e293b; line-height:1.6;'>{item['text']}</div>", unsafe_allow_html=True)
+                with col_t4:
+                    scores[item['id']] = st.radio(
+                        f"درجة البند {item['num']}",
+                        options=[1, 2, 3, 4],
+                        index=3,
+                        horizontal=True,
+                        key=f"radio_{item['id']}",
+                        label_visibility="collapsed"
+                    )
+                st.markdown("<hr style='margin: 4px 0; border: 0.5px solid #f1f5f9;'>", unsafe_allow_html=True)
+
+            total_val = sum(scores.values())
+            max_val = len(RUBRIC_ITEMS) * 4 # 80 درجة
+            
+            st.markdown(f"""
+            <div style="background-color:#f0fdf4; border:1px solid #bbf7d0; border-radius:12px; padding:15px; text-align:center; margin-top:20px;">
+                <span style="font-size:19px; font-weight:800; color:#166534;">💡 المجموع الكلي لدرجات التقييم الصفي (20 بنداً): {total_val} من {max_val}</span>
+            </div>
+            """, unsafe_allow_html=True)
+
+            notes_input = st.text_area("توصيات وملحوظات المشرف الزائر:", key="notes_area")
+
+            st.markdown("---")
+            st.subheader("✍️ التوقيعات والاعتماد الرسمي")
+            
+            col_s1, col_s2 = st.columns(2)
+            with col_s1:
+                sign_teacher = st.selectbox("اسم المعلم المطلع:", teacher_names, index=teacher_names.index(selected_teacher) if selected_teacher in teacher_names else 0, key="sign_t_sel")
+                st.caption("توقيع المعلم: ______________________")
+                
+            with col_s2:
+                admin_options = [f"{a['title']}: {a['name']}" for a in ADMIN_DATA]
+                admin_choice = st.selectbox("الاعتماد الإداري:", admin_options, key="sign_adm_sel")
+                admin_title_part, admin_name_part = admin_choice.split(": ")
+                st.caption(f"توقيع {admin_title_part}: ______________________")
+
+            st.markdown("<br>", unsafe_allow_html=True)
             submit_save = st.form_submit_button("💾 حفظ الاستمارة في قاعدة البيانات الدائمة", type="primary", use_container_width=True)
 
-    if submit_save:
-        conn = sqlite3.connect(DB_FILE)
-        c = conn.cursor()
-        c.execute('''
-            INSERT INTO evaluations (
-                teacher_name, specialization, assigned_subjects, grade, class_name, semester,
-                session_num, visit_num, eval_date, q1_score, q2_score, q3_score, q4_score,
-                q5_score, q6_score, q7_score, q8_score, total_score, notes, 
-                signed_teacher, signed_admin, admin_title
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        ''', (
-            selected_teacher, teacher_info['spec'], teacher_info['subjects'], selected_grade, selected_class, selected_semester,
-            selected_session, selected_visit, str(today_date), scores['q1'], scores['q2'], scores['q3'], scores['q4'],
-            scores['q5'], scores['q6'], scores['q7'], scores['q8'], total_val, notes_input,
-            sign_teacher, admin_name_part, admin_title_part
-        ))
-        conn.commit()
-        conn.close()
-        st.success("✅ تم حفظ استمارة التقييم بنجاح في قاعدة البيانات الدائمة!")
+        if submit_save:
+            conn = sqlite3.connect(DB_FILE)
+            c = conn.cursor()
+            
+            query = """
+                INSERT INTO evaluations (
+                    teacher_name, specialization, assigned_subjects, grade, class_name, semester,
+                    session_num, visit_num, eval_date,
+                    q1_score, q2_score, q3_score, q4_score, q5_score, q6_score, q7_score, q8_score, q9_score, q10_score,
+                    q11_score, q12_score, q13_score, q14_score, q15_score, q16_score, q17_score, q18_score, q19_score, q20_score,
+                    total_score, notes, signed_teacher, signed_admin, admin_title
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """
+            params = (
+                selected_teacher, teacher_info['spec'], teacher_info['subjects'], selected_grade, selected_class, selected_semester,
+                selected_session, selected_visit, str(today_date),
+                scores['q1'], scores['q2'], scores['q3'], scores['q4'], scores['q5'], scores['q6'], scores['q7'], scores['q8'], scores['q9'], scores['q10'],
+                scores['q11'], scores['q12'], scores['q13'], scores['q14'], scores['q15'], scores['q16'], scores['q17'], scores['q18'], scores['q19'], scores['q20'],
+                total_val, notes_input, sign_teacher, admin_name_part, admin_title_part
+            )
+            c.execute(query, params)
+            conn.commit()
+            conn.close()
+            st.success("✅ تم حفظ استمارة التقييم الـ 20 بنداً بنجاح في قاعدة البيانات!")
 
-    if st.button("🖨️ طباعة الاستمارة الحالية (A4 / PDF)", type="secondary", use_container_width=True):
-        st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
+        if st.button("🖨️ طباعة الاستمارة الحالية (A4 / PDF)", type="secondary", use_container_width=True, key="print_main_btn"):
+            st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
 
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# التبويب الثاني: استرجاع وطباعة استمارة معلم
+# التبويب الثاني: استرجاع وتعديل / حذف استمارة
 # ==========================================
 with tab2:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
-    st.subheader("🔎 البحث عن استمارة تقييم معلم سابقاً")
+    st.subheader("🔍 البحث عن استمارة تقييم وإدارتها (تعديل / حذف / طباعة)")
     
-    col_f1, col_f2, col_f3 = st.columns([2, 2, 1])
-    with col_f1:
-        search_teacher = st.selectbox("اختر اسم المعلم:", list(TEACHERS_DATA.keys()), key="search_t")
-    with col_f2:
-        search_visit = st.selectbox("اختر رقم الزيارة:", VISITS_LIST, key="search_v")
-    with col_f3:
-        st.markdown("<br>", unsafe_allow_html=True)
-        btn_start = st.button("🚀 ابدأ البحث", type="primary", use_container_width=True)
+    teachers_dict = get_teachers_dict()
+    t_list = list(teachers_dict.keys())
+    
+    if t_list:
+        col_f1, col_f2, col_f3 = st.columns(3)
+        with col_f1:
+            search_teacher = st.selectbox("اختر اسم المعلم:", t_list, key="search_t_tab2")
+        with col_f2:
+            search_visit = st.selectbox("اختر رقم الزيارة:", VISITS_LIST, key="search_v_tab2")
+        with col_f3:
+            st.markdown("<br>", unsafe_allow_html=True)
+            btn_start = st.button("🚀 ابدأ البحث", type="primary", use_container_width=True, key="btn_search_tab2")
 
-    if btn_start:
-        conn = sqlite3.connect(DB_FILE)
-        df_search = pd.read_sql_query(
-            "SELECT * FROM evaluations WHERE teacher_name = ? AND visit_num = ? ORDER BY id DESC LIMIT 1", 
-            conn, params=(search_teacher, search_visit)
-        )
-        conn.close()
-        
-        if not df_search.empty:
-            rec = df_search.iloc[0]
-            st.markdown(f"""
-                <div style="border: 2px solid #1e3a8a; border-radius:12px; padding:20px; background-color:#ffffff;">
-                    <h2 style="text-align:center; color:#1e3a8a; font-weight:900;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
-                    <h3 style="text-align:center; color:#0d9488; font-weight:700;">بطاقة تقييم الأداء الصفي والزيارة الإشرافية</h3>
-                    <hr style="border-top: 2px solid #0d9488;">
-                    
-                    <table style="width:100%; text-align:right; font-size:15px; line-height:2;">
-                        <tr>
-                            <td><b>اسم المعلم:</b> {rec['teacher_name']}</td>
-                            <td><b>التخصص:</b> {rec['specialization']}</td>
-                            <td><b>التاريخ:</b> {rec['eval_date']}</td>
-                        </tr>
-                        <tr>
-                            <td><b>الصف:</b> {rec['grade']}</td>
-                            <td><b>الفصل:</b> {rec['class_name']}</td>
-                            <td><b>الفصل الدراسي:</b> {rec.get('semester', 'الأول')}</td>
-                        </tr>
-                        <tr>
-                            <td><b>الحصة:</b> {rec['session_num']}</td>
-                            <td><b>رقم الزيارة:</b> {rec['visit_num']}</td>
-                            <td><b>المواد:</b> {rec['assigned_subjects']}</td>
-                        </tr>
-                    </table>
-                    <hr>
-                    <h4 style="color:#1e3a8a;">📊 ملخص تقييم البنود:</h4>
-                    <table style="width:100%; border-collapse:collapse; margin-top:10px; font-size:14px;" border="1" cellpadding="8">
-                        <tr style="background-color:#f1f5f9; text-align:center;">
-                            <th>عنصر التقييم</th>
-                            <th>الدرجة المستحقة (من 4)</th>
-                        </tr>
-                        <tr><td>تخطيط الدرس على المنصة وتوافقه مع الخطة</td><td style="text-align:center; font-weight:bold;">{rec.get('q1_score', 4)}</td></tr>
-                        <tr><td>متابعة الواجبات وتغذية رجعية</td><td style="text-align:center; font-weight:bold;">{rec.get('q2_score', 4)}</td></tr>
-                        <tr><td>إدارة مشاركة الطلاب الصوتية والمكتوبة</td><td style="text-align:center; font-weight:bold;">{rec.get('q3_score', 4)}</td></tr>
-                        <tr><td>متابعة وتسجيل الحضور والغياب</td><td style="text-align:center; font-weight:bold;">{rec.get('q4_score', 4)}</td></tr>
-                    </table>
-                    
-                    <div style="margin-top:15px; background-color:#f8fafc; padding:10px; border-radius:8px;">
-                        <b>المجموع الكلي للتقييم:</b> <span style="font-size:18px; color:#16a34a; font-weight:bold;">{rec['total_score']} / 32</span>
+        if btn_start or st.session_state.get('last_searched_id'):
+            conn = sqlite3.connect(DB_FILE)
+            df_search = pd.read_sql_query(
+                "SELECT * FROM evaluations WHERE teacher_name = ? AND visit_num = ? ORDER BY id DESC LIMIT 1", 
+                conn, params=(search_teacher, search_visit)
+            )
+            conn.close()
+            
+            if not df_search.empty:
+                rec = df_search.iloc[0]
+                rec_id = int(rec['id'])
+                st.session_state['last_searched_id'] = rec_id
+                
+                # عرض البطاقة الرسمية للطباعة
+                st.markdown(f"""
+                    <div style="border: 2px solid #1e3a8a; border-radius:12px; padding:20px; background-color:#ffffff;">
+                        <h2 style="text-align:center; color:#1e3a8a; font-weight:900;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
+                        <h3 style="text-align:center; color:#0d9488; font-weight:700;">بطاقة تقييم الأداء الصفي والزيارة الإشرافية (20 بنداً)</h3>
+                        <hr style="border-top: 2px solid #0d9488;">
+                        
+                        <table style="width:100%; text-align:right; font-size:15px; line-height:2;">
+                            <tr>
+                                <td><b>اسم المعلم:</b> {rec['teacher_name']}</td>
+                                <td><b>التخصص:</b> {rec['specialization']}</td>
+                                <td><b>التاريخ:</b> {rec['eval_date']}</td>
+                            </tr>
+                            <tr>
+                                <td><b>الصف:</b> {rec['grade']}</td>
+                                <td><b>الفصل:</b> {rec['class_name']}</td>
+                                <td><b>الفصل الدراسي:</b> {rec.get('semester', 'الأول')}</td>
+                            </tr>
+                            <tr>
+                                <td><b>الحصة:</b> {rec['session_num']}</td>
+                                <td><b>رقم الزيارة:</b> {rec['visit_num']}</td>
+                                <td><b>المواد:</b> {rec['assigned_subjects']}</td>
+                            </tr>
+                        </table>
+                        <hr>
+                        <h4 style="color:#1e3a8a;">📊 ملخص التقييم الكلي:</h4>
+                        <p><b>المجموع الكلي:</b> <span style="font-size:20px; color:#16a34a; font-weight:bold;">{rec['total_score']} / 80</span></p>
+                        <p style="margin-top:10px;"><b>التوصيات والملحوظات:</b> {rec['notes'] if rec['notes'] else 'لا يوجد'}</p>
+                        <hr>
+                        <table style="width:100%; text-align:center; margin-top:20px;">
+                            <tr>
+                                <td><b>توقيع المعلم المطلع:</b> {rec['signed_teacher']}<br>__________________</td>
+                                <td><b>اعتماد {rec['admin_title']}:</b> {rec['signed_admin']}<br>__________________</td>
+                            </tr>
+                        </table>
                     </div>
+                """, unsafe_allow_html=True)
+                
+                st.markdown("<br>", unsafe_allow_html=True)
+                col_act1, col_act2, col_act3 = st.columns(3)
+                
+                with col_act1:
+                    if st.button("🖨️ طباعة الاستمارة المسترجعة (A4)", type="secondary", use_container_width=True, key="print_rec_btn"):
+                        st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
+                
+                with col_act2:
+                    show_edit = st.button("✏️ تعديل هذه الاستمارة", type="primary", use_container_width=True, key="btn_show_edit")
+                
+                with col_act3:
+                    show_delete = st.button("🗑️ حذف هذه الاستمارة", type="primary", use_container_width=True, key="btn_show_del")
+
+                # إجراء الحذف
+                if show_delete:
+                    conn = sqlite3.connect(DB_FILE)
+                    c = conn.cursor()
+                    c.execute("DELETE FROM evaluations WHERE id = ?", (rec_id,))
+                    conn.commit()
+                    conn.close()
+                    st.success("✅ تم حذف الاستمارة بنجاح من قاعدة البيانات!")
+                    st.session_state.pop('last_searched_id', None)
+                    st.rerun()
+
+                # إجراء التعديل
+                if show_edit or st.session_state.get(f'editing_{rec_id}'):
+                    st.session_state[f'editing_{rec_id}'] = True
+                    st.markdown("---")
+                    st.subheader("✏️ نموذج تعديل الاستمارة")
                     
-                    <p style="margin-top:15px;"><b>التوصيات والملحوظات:</b> {rec['notes'] if rec['notes'] else 'لا يوجد'}</p>
-                    <hr>
-                    <table style="width:100%; text-align:center; margin-top:25px;">
-                        <tr>
-                            <td><b>توقيع المعلم المطلع:</b> {rec['signed_teacher']}<br>__________________</td>
-                            <td><b>اعتماد {rec['admin_title']}:</b> {rec['signed_admin']}<br>__________________</td>
-                        </tr>
-                    </table>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            if st.button("🖨️ طباعة الاستمارة المسترجعة (A4 / PDF)", key="print_single_rec", type="secondary"):
-                st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
-        else:
-            st.warning("⚠️ لم يتم العثور على استمارة تقييم مسجلة لهذا المعلم في الزيارة المحددة.")
-            
+                    with st.form(f"edit_form_{rec_id}"):
+                        new_notes = st.text_area("التوصيات والملحوظات الجديدة:", value=rec['notes'])
+                        new_total = st.number_input("المجموع الكلي المعدل (من 80):", min_value=0, max_value=80, value=int(rec['total_score']))
+                        save_changes = st.form_submit_button("💾 حفظ التعديلات", type="primary")
+                        
+                        if save_changes:
+                            conn = sqlite3.connect(DB_FILE)
+                            c = conn.cursor()
+                            c.execute("UPDATE evaluations SET notes = ?, total_score = ? WHERE id = ?", (new_notes, new_total, rec_id))
+                            conn.commit()
+                            conn.close()
+                            st.success("✅ تم تحديث بيانات الاستمارة بنجاح!")
+                            st.session_state.pop(f'editing_{rec_id}', None)
+                            st.rerun()
+            else:
+                st.warning("⚠️ لم يتم العثور على استمارة تقييم مسجلة لهذا المعلم في الزيارة المحددة.")
+    else:
+        st.info("ℹ️ لا توجد بيانات معلمين مسجلة.")
+        
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# التبويب الثالث: التقارير العامة (Excel / PDF)
+# التبويب الثالث: إضافة معلم جديد
 # ==========================================
 with tab3:
+    st.markdown('<div class="centered-card">', unsafe_allow_html=True)
+    st.subheader("➕ إضافة معلم جديد إلى قائمة النظام")
+    
+    with st.form("add_teacher_form", clear_on_submit=True):
+        col_t1, col_t2, col_t3 = st.columns(3)
+        with col_t1:
+            new_t_name = st.text_input("اسم المعلم الثلاثي/الرباعي:")
+        with col_t2:
+            new_t_spec = st.text_input("التخصص:")
+        with col_t3:
+            new_t_subj = st.text_input("المواد المسندة:")
+            
+        btn_add_t = st.form_submit_button("➕ حفظ المعلم الجديد", type="primary", use_container_width=True)
+        
+        if btn_add_t:
+            if new_t_name.strip() and new_t_spec.strip():
+                try:
+                    conn = sqlite3.connect(DB_FILE)
+                    c = conn.cursor()
+                    c.execute("INSERT INTO teachers (name, specialization, assigned_subjects) VALUES (?, ?, ?)",
+                              (new_t_name.strip(), new_t_spec.strip(), new_t_subj.strip()))
+                    conn.commit()
+                    conn.close()
+                    st.success(f"✅ تم إدراج المعلم ({new_t_name}) بنجاح إلى قائمة المعلمين!")
+                    st.rerun()
+                except sqlite3.IntegrityError:
+                    st.error("⚠️ هذا المعلم مسجل بالفعل في القائمة.")
+            else:
+                st.warning("⚠️ يرجى إدخال اسم المعلم وتخصصه على الأقل.")
+                
+    st.markdown("---")
+    st.subheader("📋 قائمة المعلمين المسجلين حالياً في النظام")
+    teachers_dict = get_teachers_dict()
+    if teachers_dict:
+        t_df = pd.DataFrame([
+            {"اسم المعلم": k, "التخصص": v['spec'], "المواد المسندة": v['subjects']} 
+            for k, v in teachers_dict.items()
+        ])
+        st.dataframe(t_df, use_container_width=True)
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==========================================
+# التبويب الرابع: التقارير العامة (Excel / PDF)
+# ==========================================
+with tab4:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
     st.subheader("📑 التقرير العام لجميع المعلمين والتصدير")
     
@@ -568,7 +687,7 @@ with tab3:
             )
             
         with col_exp2:
-            if st.button("🖨️ طباعة وتصدير التقرير الكلي (PDF)", use_container_width=True):
+            if st.button("🖨️ طباعة وتصدير التقرير الكلي (PDF)", use_container_width=True, key="print_all_btn"):
                 st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
     else:
         st.info("ℹ️ لا توجد بيانات مسجلة في قاعدة البيانات حتى الآن.")
