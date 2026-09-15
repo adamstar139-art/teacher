@@ -56,7 +56,7 @@ html, body, [class*="css"], .stApp {
     border-radius: 16px;
     padding: 24px;
     margin: 0 auto 25px auto;
-    max-width: 950px;
+    max-width: 980px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
 }
 .centered-header {
@@ -96,7 +96,7 @@ div[data-baseweb="select"] span {
     border-color: #0d9488 !important;
 }
 
-/* شارات وشريط دلالات مستويات التقييم مثل الصورة */
+/* شارات وشريط دلالات مستويات التقييم */
 .badge-container {
     display: flex;
     justify-content: flex-start;
@@ -136,7 +136,7 @@ div[data-baseweb="select"] span {
     margin-bottom: 10px;
 }
 
-/* جدول عناصر التقييم الصفي (مطابق للصورة تماماً) */
+/* جدول عناصر التقييم الصفي */
 .eval-table {
     width: 100%;
     border-collapse: collapse;
@@ -163,6 +163,15 @@ div[data-baseweb="select"] span {
     font-weight: 700 !important;
     font-family: 'Tajawal', sans-serif !important;
     transition: all 0.3s ease !important;
+}
+
+/* مربع الاعتماد والتوقيعات الرسمية */
+.signatures-box {
+    background-color: #ffffff;
+    border: 2px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 18px;
+    margin-top: 25px;
 }
 
 /* التوافق التام مع الجوال */
@@ -266,8 +275,8 @@ def init_db():
             total_score INTEGER,
             notes TEXT,
             signed_teacher TEXT,
-            signed_admin TEXT,
-            admin_title TEXT,
+            vice_principal TEXT,
+            principal TEXT,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
@@ -284,10 +293,17 @@ def get_teachers_dict():
     conn.close()
     return {r[0]: {"spec": r[1], "subjects": r[2]} for r in rows}
 
-ADMIN_DATA = [
-    {"name": "ابراهيم بن موسى التميمي", "title": "مدير المدرسة"},
-    {"name": "محمد مبروك محمد السيد", "title": "وكيل الشؤون التعليمية"}
-]
+def parse_subjects(subjects_str):
+    if not subjects_str:
+        return ["عام"]
+    for sep in ['+', ',', '/']:
+        if sep in subjects_str:
+            return [s.strip() for s in subjects_str.split(sep) if s.strip()]
+    return [subjects_str.strip()]
+
+# المسؤولين الثابتين بحسب الطلب
+VICE_PRINCIPAL_NAME = "محمد مبروك محمد السيد"
+PRINCIPAL_NAME = "إبراهيم بن موسى التميمي"
 
 # الربط الديناميكي بين الصفوف والفصول
 GRADE_CLASSES_MAP = {
@@ -296,7 +312,7 @@ GRADE_CLASSES_MAP = {
     "الثالث المتوسط": ["3/1", "3/2", "3/3"]
 }
 
-# حذف الفصل الدراسي الثالث - يتبقى الفصل الأول والثاني فقط
+# الفصل الدراسي الأول والثاني فقط
 SEMESTERS_LIST = ["الفصل الدراسي الأول", "الفصل الدراسي الثاني"]
 SESSIONS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة"]
 VISITS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة"]
@@ -362,18 +378,27 @@ with tab1:
     if not teacher_names:
         st.warning("⚠️ لا يوجد معلمون مسجلون. يرجى إضافة معلم من تبويب (➕ إضافة معلم جديد).")
     else:
-        # الربط الديناميكي الفوري خارج st.form لضمان تحديث قائمة الفصول تلقائياً فور اختيار الصف
+        # الربط الديناميكي الفوري خارج st.form لحديث الحقول فورياً
         col1, col2, col3 = st.columns(3)
         
         with col1:
             selected_teacher = st.selectbox("اختر اسم المعلم:", teacher_names, key="main_teacher_sel")
             teacher_info = teachers_dict[selected_teacher]
+            
+            # إظهار التخصص تلقائياً
             st.text_input("التخصص (تلقائي):", value=teacher_info['spec'], disabled=True, key="spec_dis")
-            st.text_input("المواد المسندة:", value=teacher_info['subjects'], disabled=True, key="subj_dis")
+            
+            # ربط المواد المسندة وإظهار قائمة للاختيار إذا كانت أكثر من مادة
+            subj_list = parse_subjects(teacher_info['subjects'])
+            if len(subj_list) > 1:
+                selected_subject = st.selectbox("المادة المزار فيها (اختر المادة):", subj_list, key="subj_select_multi")
+            else:
+                selected_subject = subj_list[0]
+                st.text_input("المادة المزار فيها (تلقائي):", value=selected_subject, disabled=True, key="subj_dis_single")
             
         with col2:
             selected_grade = st.selectbox("الصف الدراسي:", list(GRADE_CLASSES_MAP.keys()), key="main_grade_sel")
-            # الربط التلقائي الحقيقي: اختيار الصف يحدد فصول ذلك الصف فقط
+            # الربط التلقائي الفوري: اختيار الصف يحدد فصول ذلك الصف فقط
             available_classes = GRADE_CLASSES_MAP[selected_grade]
             selected_class = st.selectbox("الفصل:", available_classes, key="main_class_sel")
             selected_semester = st.selectbox("الفصل الدراسي:", SEMESTERS_LIST, key="main_sem_sel")
@@ -386,7 +411,7 @@ with tab1:
         st.markdown("---")
         st.markdown('<h3>🎯 بنود التقييم الـ 20 ومستويات الأداء (من 1 إلى 4)</h3>', unsafe_allow_html=True)
         
-        # شريط الدلالات (مطابق للصورة)
+        # شريط الدلالات
         st.markdown("""
         <div class="badge-container">
             <span style="font-weight:700; color:#1e3a8a; margin-left:15px;">عناصر التقييم:</span>
@@ -445,16 +470,17 @@ with tab1:
             st.markdown("---")
             st.subheader("✍️ التوقيعات والاعتماد الرسمي")
             
-            col_s1, col_s2 = st.columns(2)
+            # إضافة توقيع وكيل المدرسة ومدير المدرسة بحسب الطلب
+            col_s1, col_s2, col_s3 = st.columns(3)
             with col_s1:
                 sign_teacher = st.selectbox("اسم المعلم المطلع:", teacher_names, index=teacher_names.index(selected_teacher) if selected_teacher in teacher_names else 0, key="sign_t_sel")
-                st.caption("توقيع المعلم: ______________________")
+                st.markdown("<div style='text-align:center; font-weight:bold; margin-top:8px;'>توقيع المعلم المطلع:<br>____________________</div>", unsafe_allow_html=True)
                 
             with col_s2:
-                admin_options = [f"{a['title']}: {a['name']}" for a in ADMIN_DATA]
-                admin_choice = st.selectbox("الاعتماد الإداري:", admin_options, key="sign_adm_sel")
-                admin_title_part, admin_name_part = admin_choice.split(": ")
-                st.caption(f"توقيع {admin_title_part}: ______________________")
+                st.markdown(f"<div style='text-align:center; line-height:1.8;'><span style='color:#1e3a8a; font-weight:bold;'>وكيل الشؤون التعليمية:</span><br><b>{VICE_PRINCIPAL_NAME}</b><br><br><b>التوقيع:</b> ____________________</div>", unsafe_allow_html=True)
+
+            with col_s3:
+                st.markdown(f"<div style='text-align:center; line-height:1.8;'><span style='color:#1e3a8a; font-weight:bold;'>مدير المدرسة:</span><br><b>{PRINCIPAL_NAME}</b><br><br><b>التوقيع:</b> ____________________</div>", unsafe_allow_html=True)
 
             st.markdown("<br>", unsafe_allow_html=True)
             submit_save = st.form_submit_button("💾 حفظ الاستمارة في قاعدة البيانات الدائمة", type="primary", use_container_width=True)
@@ -469,15 +495,15 @@ with tab1:
                     session_num, visit_num, eval_date,
                     q1_score, q2_score, q3_score, q4_score, q5_score, q6_score, q7_score, q8_score, q9_score, q10_score,
                     q11_score, q12_score, q13_score, q14_score, q15_score, q16_score, q17_score, q18_score, q19_score, q20_score,
-                    total_score, notes, signed_teacher, signed_admin, admin_title
+                    total_score, notes, signed_teacher, vice_principal, principal
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """
             params = (
-                selected_teacher, teacher_info['spec'], teacher_info['subjects'], selected_grade, selected_class, selected_semester,
+                selected_teacher, teacher_info['spec'], selected_subject, selected_grade, selected_class, selected_semester,
                 selected_session, selected_visit, str(today_date),
                 scores['q1'], scores['q2'], scores['q3'], scores['q4'], scores['q5'], scores['q6'], scores['q7'], scores['q8'], scores['q9'], scores['q10'],
                 scores['q11'], scores['q12'], scores['q13'], scores['q14'], scores['q15'], scores['q16'], scores['q17'], scores['q18'], scores['q19'], scores['q20'],
-                total_val, notes_input, sign_teacher, admin_name_part, admin_title_part
+                total_val, notes_input, sign_teacher, VICE_PRINCIPAL_NAME, PRINCIPAL_NAME
             )
             c.execute(query, params)
             conn.commit()
@@ -525,11 +551,11 @@ with tab2:
                 # عرض البطاقة الرسمية للطباعة
                 st.markdown(f"""
                     <div style="border: 2px solid #1e3a8a; border-radius:12px; padding:20px; background-color:#ffffff;">
-                        <h2 style="text-align:center; color:#1e3a8a; font-weight:900;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
-                        <h3 style="text-align:center; color:#0d9488; font-weight:700;">بطاقة تقييم الأداء الصفي والزيارة الإشرافية (20 بنداً)</h3>
+                        <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin:0;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
+                        <h3 style="text-align:center; color:#0d9488; font-weight:700; margin-top:5px;">بطاقة تقييم الأداء الصفي والزيارة الإشرافية (20 بنداً)</h3>
                         <hr style="border-top: 2px solid #0d9488;">
                         
-                        <table style="width:100%; text-align:right; font-size:15px; line-height:2;">
+                        <table style="width:100%; text-align:right; font-size:15px; line-height:2.2;">
                             <tr>
                                 <td><b>اسم المعلم:</b> {rec['teacher_name']}</td>
                                 <td><b>التخصص:</b> {rec['specialization']}</td>
@@ -543,7 +569,7 @@ with tab2:
                             <tr>
                                 <td><b>الحصة:</b> {rec['session_num']}</td>
                                 <td><b>رقم الزيارة:</b> {rec['visit_num']}</td>
-                                <td><b>المواد:</b> {rec['assigned_subjects']}</td>
+                                <td><b>المادة المزار فيها:</b> {rec['assigned_subjects']}</td>
                             </tr>
                         </table>
                         <hr>
@@ -551,10 +577,20 @@ with tab2:
                         <p><b>المجموع الكلي:</b> <span style="font-size:20px; color:#16a34a; font-weight:bold;">{rec['total_score']} / 80</span></p>
                         <p style="margin-top:10px;"><b>التوصيات والملحوظات:</b> {rec['notes'] if rec['notes'] else 'لا يوجد'}</p>
                         <hr>
-                        <table style="width:100%; text-align:center; margin-top:20px;">
+                        <table style="width:100%; text-align:center; margin-top:25px; line-height:2;">
                             <tr>
-                                <td><b>توقيع المعلم المطلع:</b> {rec['signed_teacher']}<br>__________________</td>
-                                <td><b>اعتماد {rec['admin_title']}:</b> {rec['signed_admin']}<br>__________________</td>
+                                <td style="width:33%;">
+                                    <b>المعلم المطلع:</b><br>{rec['signed_teacher']}<br>
+                                    <b>التوقيع:</b> ___________________
+                                </td>
+                                <td style="width:33%;">
+                                    <b>وكيل الشؤون التعليمية:</b><br>{rec.get('vice_principal', VICE_PRINCIPAL_NAME)}<br>
+                                    <b>التوقيع:</b> ___________________
+                                </td>
+                                <td style="width:33%;">
+                                    <b>مدير المدرسة:</b><br>{rec.get('principal', PRINCIPAL_NAME)}<br>
+                                    <b>التوقيع:</b> ___________________
+                                </td>
                             </tr>
                         </table>
                     </div>
@@ -625,7 +661,7 @@ with tab3:
         with col_t2:
             new_t_spec = st.text_input("التخصص:")
         with col_t3:
-            new_t_subj = st.text_input("المواد المسندة:")
+            new_t_subj = st.text_input("المواد المسندة (إذا كانت أكثر من مادة افصل بينها بـ +):")
             
         btn_add_t = st.form_submit_button("➕ حفظ المعلم الجديد", type="primary", use_container_width=True)
         
@@ -693,4 +729,5 @@ with tab4:
         st.info("ℹ️ لا توجد بيانات مسجلة في قاعدة البيانات حتى الآن.")
         
     st.markdown('</div>', unsafe_allow_html=True)
+
 
