@@ -17,180 +17,96 @@ st.set_page_config(
 # كود التنسيق الجمالي المتقدم ودعم الجوال والطباعة A4
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
-
-html, body, [class*="css"], .stApp {
-    font-family: 'Tajawal', sans-serif !important;
-    direction: rtl;
-    text-align: right;
-    background-color: #f8fafc;
-}
-
-/* ترويسة رئيسية جذابة */
-.header-box {
-    background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%);
-    color: white;
-    padding: 22px;
-    border-radius: 16px;
-    text-align: center;
-    margin-bottom: 25px;
-    box-shadow: 0 8px 20px rgba(13, 148, 136, 0.2);
-}
-.header-box h1 {
-    color: #ffffff;
-    font-weight: 900;
-    margin: 0;
-    font-size: 26px;
-}
-.header-box h3 {
-    color: #fef08a;
-    margin-top: 8px;
-    font-weight: 700;
-    font-size: 18px;
-}
-
-/* بطاقات التنسيق الممركزة والبيانات الأساسية */
-.centered-card {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 24px;
-    margin: 0 auto 25px auto;
-    max-width: 1000px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-}
-.centered-header {
-    text-align: center;
-    color: #1e3a8a;
-    font-weight: 700;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-/* شكل جمالي متطور للقوائم المنسدلة والحقول */
-div[data-baseweb="select"] > div {
-    background-color: #ffffff !important;
-    border: 1.5px solid #cbd5e1 !important;
-    border-radius: 10px !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
-}
-div[data-baseweb="select"] > div:hover {
-    border-color: #0d9488 !important;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15) !important;
-}
-div[data-baseweb="select"] span {
-    font-family: 'Tajawal', sans-serif !important;
-    font-weight: 600 !important;
-    color: #1e293b !important;
-}
-
-/* مدخلات النصوص والتواريخ */
-.stTextInput input, .stDateInput input, .stTextArea textarea {
-    border-radius: 10px !important;
-    border: 1.5px solid #cbd5e1 !important;
-    font-family: 'Tajawal', sans-serif !important;
-    text-align: right !important;
-}
-
-/* شارات وشريط دلالات مستويات التقييم */
-.badge-container {
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 15px;
-    padding: 10px 15px;
-    background-color: #f1f5f9;
-    border-radius: 10px;
-    direction: rtl;
-}
-.badge-item {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-weight: 700;
-    font-size: 14px;
-}
-.badge-1 { background-color: #fee2e2; color: #dc2626; }
-.badge-2 { background-color: #fef9c3; color: #ca8a04; }
-.badge-3 { background-color: #e0f2fe; color: #0369a1; }
-.badge-4 { background-color: #dbeafe; color: #1e40af; }
-.badge-5 { background-color: #dcfce7; color: #16a34a; }
-
-/* جدول عناصر التقييم الصفي محاذى لليمين بالكامل */
-.eval-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    direction: rtl !important;
-}
-.eval-table th {
-    background-color: #eff6ff;
-    color: #1e3a8a;
-    padding: 12px 15px;
-    font-weight: 800;
-    font-size: 15px;
-    border-bottom: 2px solid #dbeafe;
-    text-align: right !important;
-}
-.eval-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #f1f5f9;
-    text-align: right !important;
-}
-
-/* محاذاة أزرار الخيارات الراديو (Radio buttons) لليمين */
-div[role="radiogroup"] {
-    display: flex !important;
-    flex-direction: row-reverse !important;
-    justify-content: flex-end !important;
-    gap: 15px !important;
-}
-
-/* التوافق مع الجوال */
-@media (max-width: 768px) {
-    .header-box h1 { font-size: 20px; }
-    .header-box h3 { font-size: 15px; }
-    .centered-card { padding: 15px; }
-    div[data-testid="column"] { width: 100% !important; margin-bottom: 10px; }
-    div[role="radiogroup"] { gap: 8px !important; }
-}
-
-/* التنسيق المخصص للطباعة بحجم ورقة A4 portrait */
-@media print {
-    @page {
-        size: A4 portrait;
-        margin: 8mm 8mm 8mm 8mm;
+    @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
+    
+    html, body, [class*="css"] {
+        font-family: 'Cairo', sans-serif;
+        direction: rtl;
+        text-align: right;
     }
-    body, .stApp {
-        background-color: white !important;
-        color: black !important;
+    
+    .main {
+        background-color: #f8fafc;
     }
-    .no-print, header, footer, [data-testid="stSidebar"], .stTabs [role="tablist"], button {
-        display: none !important;
-    }
+    
     .centered-card {
-        box-shadow: none !important;
-        border: 1px solid #666 !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        padding: 8px !important;
-        margin: 0 !important;
+        background: #ffffff;
+        padding: 25px;
+        border-radius: 16px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        border: 1px solid #e2e8f0;
+        margin-bottom: 25px;
     }
-    .header-box {
-        background: #1e3a8a !important;
-        color: white !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        padding: 12px !important;
-        border-radius: 6px !important;
+    
+    /* تنسيق جدول التقييم */
+    .eval-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        direction: rtl;
     }
-}
+    .eval-table th {
+        background-color: #1e3a8a;
+        color: white;
+        padding: 12px;
+        text-align: right;
+        font-weight: 700;
+        font-size: 15px;
+        border: 1px solid #1e3a8a;
+    }
+    .eval-table td {
+        padding: 10px;
+        border: 1px solid #e2e8f0;
+        text-align: right;
+    }
+    .eval-table tr:nth-child(even) {
+        background-color: #f8fafc;
+    }
+
+    /* شارات التقييم */
+    .badge-container {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-bottom: 15px;
+        flex-wrap: wrap;
+    }
+    .badge-item {
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 13px;
+        color: white;
+    }
+    .badge-1 { background-color: #ef4444; }
+    .badge-2 { background-color: #f97316; }
+    .badge-3 { background-color: #eab308; }
+    .badge-4 { background-color: #3b82f6; }
+    .badge-5 { background-color: #22c55e; }
+
+    /* تحسينات الطباعة A4 */
+    @media print {
+        body {
+            background-color: white !important;
+            color: black !important;
+        }
+        .stButton, .stDownloadButton, header, footer, [data-testid="stSidebar"], .stTabs [role="tablist"] {
+            display: none !important;
+        }
+        .centered-card {
+            box-shadow: none !important;
+            border: none !important;
+            padding: 0 !important;
+        }
+        .no-print {
+            display: none !important;
+        }
+        @page {
+            size: A4 portrait;
+            margin: 10mm;
+        }
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -215,11 +131,10 @@ def init_db():
             session_num TEXT,
             visit_num TEXT,
             eval_date TEXT,
-            q1_score INTEGER, q2_score INTEGER, q3_score INTEGER, q4_score INTEGER,
-            q5_score INTEGER, q6_score INTEGER, q7_score INTEGER, q8_score INTEGER,
-            q9_score INTEGER, q10_score INTEGER, q11_score INTEGER, q12_score INTEGER,
-            q13_score INTEGER, q14_score INTEGER, q15_score INTEGER, q16_score INTEGER,
-            q17_score INTEGER, q18_score INTEGER, q19_score INTEGER, q20_score INTEGER,
+            q1_score INTEGER, q2_score INTEGER, q3_score INTEGER, q4_score INTEGER, q5_score INTEGER,
+            q6_score INTEGER, q7_score INTEGER, q8_score INTEGER, q9_score INTEGER, q10_score INTEGER,
+            q11_score INTEGER, q12_score INTEGER, q13_score INTEGER, q14_score INTEGER, q15_score INTEGER,
+            q16_score INTEGER, q17_score INTEGER, q18_score INTEGER, q19_score INTEGER, q20_score INTEGER,
             total_score INTEGER,
             notes TEXT,
             signed_teacher TEXT,
@@ -283,6 +198,34 @@ SEMESTERS_LIST = ["الفصل الدراسي الأول", "الفصل الدرا
 SESSIONS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة"]
 VISITS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة"]
 
+rubric_items = [
+    # المجال الأول: التخطيط
+    {"id": "q1", "domain": "التخطيط", "num": 1, "text": "يخطط المعلم/ة للدرس على المنصة تخطيطا متوافقا مع الخطة الفصلية للمقرر."},
+    {"id": "q2", "domain": "التخطيط", "num": 2, "text": "متابعة الواجبات المنزلية وتقديم التغذية الراجعة لها."},
+    {"id": "q3", "domain": "التخطيط", "num": 3, "text": "ادارة مشاركة الطالب/ة الصوتية والمكتوبة بكفاءة."},
+    {"id": "q4", "domain": "التخطيط", "num": 4, "text": "متابعة الطالب/ة وتسجيل الحضور ورصد حالات الغياب في المنصة أو الصف."},
+    
+    # المجال الثاني: التعلم والتعليم
+    {"id": "q5", "domain": "التعلم والتعليم", "num": 5, "text": "ينفذ المعلم/ة إجراءات الدرس وفق خارطة سير الدرس (التمهيد، أنشطة التعلم والتقويم، التقويم الختامي)."},
+    {"id": "q6", "domain": "التعلم والتعليم", "num": 6, "text": "الالتزام باللغة العربية الفصحى عند طرح الأسئلة الصفية."},
+    {"id": "q7", "domain": "التعلم والتعليم", "num": 7, "text": "يطبق المعلم/ة إستراتيجيات تدريس تراعي قدرات المتعلمين والفروق الفردية بينهم وتتسق مع الموقف التعليمي."},
+    {"id": "q8", "domain": "التعلم والتعليم", "num": 8, "text": "يستخدم المعلم/ة أساليب تحفيز تعزز الدافعية لدى المتعلمين."},
+    {"id": "q9", "domain": "التعلم والتعليم", "num": 9, "text": "ينخرط المتعلمون في أنشطة تعلم متنوعة ومتمايزة ويجيبون عن أسئلة صفية تنمي مهارات التفكير العليا."},
+    {"id": "q10", "domain": "التعلم والتعليم", "num": 10, "text": "يحصل المتعلمون على تغذية راجعة تركز على تحسن أدائهم وفق الموقف التعليمي."},
+    {"id": "q11", "domain": "التعلم والتعليم", "num": 11, "text": "يمارس المتعلمون أنشطة أدائية تقيس مدى فهمهم وتمكنهم من المهارات (أنشطة كتابية/ ملفات/ مطويات/ أوراق عمل/ مجسمات /تجارب عملية، إلخ)."},
+    {"id": "q12", "domain": "التعلم والتعليم", "num": 12, "text": "يستخدم المتعلمون أدوات رقمية لجمع المعلومات ويوظفونها في عملية التعلم."},
+    {"id": "q13", "domain": "التعلم والتعليم", "num": 13, "text": "يربط المتعلمون أنشطة التعلم بتطبيقات عملية من واقع الحياة."},
+    {"id": "q14", "domain": "التعلم والتعليم", "num": 14, "text": "يظهر المتعلمون تمكنا من مهارات القراءة والكتابة والحساب، وينمون ثروتهم اللغوية."},
+    {"id": "q15", "domain": "التعلم والتعليم", "num": 15, "text": "يتمكن المتعلمون من المعارف والمهارات في المقرر الدراسي بنسبة ما لا يقل عن 85% (اختبار الوحدات والمقننة - اختبار الفترة – الاختبار النهائي)."},
+    
+    # المجال الثالث: الشخصية المتوازنة
+    {"id": "q16", "domain": "الشخصية المتوازنة", "num": 16, "text": "يتمثل المتعلمون القيم الإسلامية والمواطنة والسلوك الصفي الحسن."},
+    {"id": "q17", "domain": "الشخصية المتوازنة", "num": 17, "text": "يتحمل المتعلمون مسؤولية تعلمهم ويمارسون التوجه الذاتي (القيادة، التنسيق. الخ) – الصف المقلوب."},
+    {"id": "q18", "domain": "الشخصية المتوازنة", "num": 18, "text": "يشارك المتعلمون في أنشطة جماعية ويعملون بروح الفريق ويسود الاحترام المتبادل والتعاطف بينهم."},
+    {"id": "q19", "domain": "الشخصية المتوازنة", "num": 19, "text": "يبادر المتعلمون للتعبير عن أفكارهم وآرائهم بثقة ووضوح في بيئة التعلم."},
+    {"id": "q20", "domain": "الشخصية المتوازنة", "num": 20, "text": "القدرة على إدارة وضبط النظام داخل الصف وفق القواعد التنظيمية."}
+]
+
 # تهيئة عداد إعادة الضبط للاستمارة الجديدة
 if 'form_reset_count' not in st.session_state:
     st.session_state['form_reset_count'] = 0
@@ -291,9 +234,9 @@ if 'form_reset_count' not in st.session_state:
 # 4. ترويسة البرنامج الرئيسية
 # ==========================================
 st.markdown("""
-<div class="header-box">
-    <h1>مدارس الثغر النموذجية الأهلية - القسم المتوسط</h1>
-    <h3>نظام المتابعة الصفية والإشرافية للمعلمين</h3>
+<div style="text-align:center; padding: 15px; background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%); border-radius:16px; color:white; margin-bottom: 25px;">
+    <h1 style="margin:0; font-weight:900; font-size:28px; color:white;">🏫 مدارس الثغر النموذجية الأهلية - القسم المتوسط</h1>
+    <h3 style="margin:5px 0 0 0; font-weight:700; font-size:18px; color:#e0f2fe;">📋 نظام المتابعة الصفية والتقييم الإشرافي للزيارات التعليمية</h3>
 </div>
 """, unsafe_allow_html=True)
 
@@ -322,12 +265,11 @@ with tab1:
 
     teachers_data = get_all_teachers()
     teacher_names = list(teachers_data.keys())
-    
+
     cnt = st.session_state['form_reset_count']
-    
-    # اختيار المعلم والربط الديناميكي الفوري بالتخصص والمواد
+
     col_top1, col_top2, col_top3 = st.columns(3)
-    
+
     with col_top1:
         selected_teacher = st.selectbox("اختر اسم المعلم:", teacher_names, key=f"eval_teacher_sel_{cnt}")
         teacher_info = teachers_data[selected_teacher]
@@ -358,7 +300,7 @@ with tab1:
 
     st.markdown("---")
     st.markdown('<h3>🎯 عناصر التقييم الصفي الـ 20 (افتراضياً 5 درجات لكل بند = 100/100)</h3>', unsafe_allow_html=True)
-    
+
     st.markdown("""
     <div class="badge-container">
         <span style="font-weight:800; color:#1e3a8a; margin-left:15px;">مستويات الأداء والدرجات (من 1 إلى 5 درجات لكل بند):</span>
@@ -369,38 +311,9 @@ with tab1:
         <span class="badge-item badge-5">5: متميز</span>
     </div>
     """, unsafe_allow_html=True)
-    
-    # قائمة البنود الـ 20 الكاملة من المصدر
-    rubric_items = [
-        # المجال الأول: التخطيط
-        {"id": "q1", "domain": "التخطيط", "num": 1, "text": "يخطط المعلم/ة للدرس على المنصة تخطيطا متوافقا مع الخطة الفصلية للمقرر."},
-        {"id": "q2", "domain": "التخطيط", "num": 2, "text": "متابعة الواجبات المنزلية وتقديم التغذية الراجعة لها."},
-        {"id": "q3", "domain": "التخطيط", "num": 3, "text": "ادارة مشاركة الطالب/ة الصوتية والمكتوبة بكفاءة."},
-        {"id": "q4", "domain": "التخطيط", "num": 4, "text": "متابعة الطالب/ة وتسجيل الحضور ورصد حالات الغياب في المنصة أو الصف."},
-        
-        # المجال الثاني: التعلم والتعليم
-        {"id": "q5", "domain": "التعلم والتعليم", "num": 5, "text": "ينفذ المعلم/ة إجراءات الدرس وفق خارطة سير الدرس (التمهيد، أنشطة التعلم والتقويم، التقويم الختامي)."},
-        {"id": "q6", "domain": "التعلم والتعليم", "num": 6, "text": "الالتزام باللغة العربية الفصحى عند طرح الأسئلة الصفية."},
-        {"id": "q7", "domain": "التعلم والتعليم", "num": 7, "text": "يطبق المعلم/ة إستراتيجيات تدريس تراعي قدرات المتعلمين والفروق الفردية بينهم وتتسق مع الموقف التعليمي."},
-        {"id": "q8", "domain": "التعلم والتعليم", "num": 8, "text": "يستخدم المعلم/ة أساليب تحفيز تعزز الدافعية لدى المتعلمين."},
-        {"id": "q9", "domain": "التعلم والتعليم", "num": 9, "text": "ينخرط المتعلمون في أنشطة تعلم متنوعة ومتمايزة ويجيبون عن أسئلة صفية تنمي مهارات التفكير العليا."},
-        {"id": "q10", "domain": "التعلم والتعليم", "num": 10, "text": "يحصل المتعلمون على تغذية راجعة تركز على تحسن أدائهم وفق الموقف التعليمي."},
-        {"id": "q11", "domain": "التعلم والتعليم", "num": 11, "text": "يمارس المتعلمون أنشطة أدائية تقيس مدى فهمهم وتمكنهم من المهارات (أنشطة كتابية/ ملفات/ مطويات/ أوراق عمل/ مجسمات /تجارب عملية، إلخ)."},
-        {"id": "q12", "domain": "التعلم والتعليم", "num": 12, "text": "يستخدم المتعلمون أدوات رقمية لجمع المعلومات ويوظفونها في عملية التعلم."},
-        {"id": "q13", "domain": "التعلم والتعليم", "num": 13, "text": "يربط المتعلمون أنشطة التعلم بتطبيقات عملية من واقع الحياة."},
-        {"id": "q14", "domain": "التعلم والتعليم", "num": 14, "text": "يظهر المتعلمون تمكنا من مهارات القراءة والكتابة والحساب، وينمون ثروتهم اللغوية."},
-        {"id": "q15", "domain": "التعلم والتعليم", "num": 15, "text": "يتمكن المتعلمون من المعارف والمهارات في المقرر الدراسي بنسبة ما لا يقل عن 85% (اختبار الوحدات والمقننة - اختبار الفترة – الاختبار النهائي)."},
-        
-        # المجال الثالث: الشخصية المتوازنة
-        {"id": "q16", "domain": "الشخصية المتوازنة", "num": 16, "text": "يتمثل المتعلمون القيم الإسلامية والمواطنة والسلوك الصفي الحسن."},
-        {"id": "q17", "domain": "الشخصية المتوازنة", "num": 17, "text": "يتحمل المتعلمون مسؤولية تعلمهم ويمارسون التوجه الذاتي (القيادة، التنسيق. الخ) – الصف المقلوب."},
-        {"id": "q18", "domain": "الشخصية المتوازنة", "num": 18, "text": "يشارك المتعلمون في أنشطة جماعية ويعملون بروح الفريق ويسود الاحترام المتبادل والتعاطف بينهم."},
-        {"id": "q19", "domain": "الشخصية المتوازنة", "num": 19, "text": "يبادر المتعلمون للتعبير عن أفكارهم وآرائهم بثقة ووضوح في بيئة التعلم."},
-        {"id": "q20", "domain": "الشخصية المتوازنة", "num": 20, "text": "القدرة على إدارة وضبط النظام داخل الصف وفق القواعد التنظيمية."}
-    ]
-    
+
     scores = {}
-    
+
     st.markdown("""
     <table class="eval-table">
         <thead>
@@ -413,7 +326,7 @@ with tab1:
         </thead>
     </table>
     """, unsafe_allow_html=True)
-    
+
     for item in rubric_items:
         col_t1, col_t2, col_t3, col_t4 = st.columns([1.5, 0.5, 5.0, 3.0])
         with col_t1:
@@ -423,22 +336,20 @@ with tab1:
         with col_t3:
             st.markdown(f"<div style='text-align:right; padding-top:8px; color:#1e293b; line-height:1.5;'>{item['text']}</div>", unsafe_allow_html=True)
         with col_t4:
-            # افتراضياً على الخيار رقم 5 (متميز - index 4) لتظهر الدرجة كاملة 100/100
             scores[item['id']] = st.radio(
                 f"الدرجة {item['num']}",
                 options=[1, 2, 3, 4, 5],
-                index=4, # الخيار رقم 5 بشكل افتراضي كامل
+                index=4,
                 horizontal=True,
                 key=f"radio_item_{item['id']}_cnt_{cnt}",
                 label_visibility="collapsed"
             )
         st.markdown("<hr style='margin: 3px 0; border: 0.5px solid #f1f5f9;'>", unsafe_allow_html=True)
 
-    # احتساب المجموع النهائي من 100 درجة (20 بند × 5 درجات = 100)
     total_val = sum(scores.values())
     max_val = 100
     percentage = (total_val / max_val) * 100
-    
+
     st.markdown(f"""
     <div style="background-color:#f0fdf4; border:2px solid #bbf7d0; border-radius:14px; padding:18px; text-align:center !important; margin-top:20px; box-shadow:0 4px 12px rgba(22, 163, 74, 0.1);">
         <span style="font-size:22px; font-weight:900; color:#166534;">🌟 المجموع الكلي لدرجات المعلم: {total_val} من {max_val} درجات ({percentage:.1f}%)</span>
@@ -449,9 +360,9 @@ with tab1:
 
     st.markdown("---")
     st.subheader("✍️ الاعتمادات والتوقيعات الرسمية")
-    
+
     col_sig1, col_sig2, col_sig3 = st.columns(3)
-    
+
     with col_sig1:
         st.markdown(f"""
         <div style="text-align:right; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
@@ -480,7 +391,7 @@ with tab1:
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    
+
     col_save_btn1, col_save_btn2 = st.columns(2)
     with col_save_btn1:
         submit_save = st.button("💾 حفظ استمارة التقييم الحالية (من 100)", type="primary", use_container_width=True, key=f"save_eval_btn_{cnt}")
@@ -510,22 +421,21 @@ with tab1:
         conn.commit()
         conn.close()
         st.success(f"✅ تم حفظ استمارة تقييم المعلم ({selected_teacher}) للتخصص ({teacher_spec}) بنجاح! المجموع: {total_val} من 100.")
-        # تعيين استمارة جديدة فارغة ومحددة على 100 درجات تلقائياً بعد الحفظ
         st.session_state['form_reset_count'] += 1
         st.rerun()
 
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# التبويب الثاني: استرجاع وتعديل / حذف استمارة
+# التبويب الثاني: استرجاع وتعديل / حذف استمارة (مع عرض الاستمارة كاملة الـ 20 بنداً)
 # ==========================================
 with tab2:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
-    st.subheader("🔍 البحث عن استمارة تقييم وإدارتها (تعديل / حذف / طباعة)")
+    st.subheader("🔍 البحث عن استمارة تقييم وإدارتها (عرض كامل / تعديل / حذف / طباعة)")
     
     teachers_data = get_all_teachers()
     t_list = list(teachers_data.keys())
-    
+
     if t_list:
         col_f1, col_f2, col_f3 = st.columns(3)
         with col_f1:
@@ -549,16 +459,16 @@ with tab2:
                 rec_id = int(rec['id'])
                 st.session_state['last_searched_id_v7'] = rec_id
                 
-                # عرض بطاقة الاستمارة المسترجعة بشكل برمجى نظيف ودون أي تسريب لأكواد HTML
+                # الترويسة الرسمية للاستمارة المسترجعة للطباعة الكاملة
                 st.markdown("""
                 <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:22px; background-color:#ffffff; direction:rtl; text-align:right;">
                     <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin-bottom:5px;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
-                    <h4 style="text-align:center; color:#0d9488; font-weight:700; margin-top:0;">بطاقة تقييم الأداء الصفي والزيارة الإشرافية (20 بنداً - 100 درجة)</h4>
+                    <h4 style="text-align:center; color:#0d9488; font-weight:700; margin-top:0;">📋 استمارة تقييم الأداء الصفي والزيارة الإشرافية الكاملة (20 بنداً - 100 درجة)</h4>
                     <hr style="border-top: 2px solid #0d9488; margin: 15px 0;">
                 </div>
                 """, unsafe_allow_html=True)
 
-                # عرض تفاصيل البيانات الأساسية باستخدام أعمدة Streamlit النظيفة بدلاً من جداول HTML المعقدة
+                # تفاصيل البيانات الأساسية
                 col_info1, col_info2, col_info3 = st.columns(3)
                 with col_info1:
                     st.write(f"👤 **اسم المعلم:** {rec['teacher_name']}")
@@ -574,11 +484,58 @@ with tab2:
                     st.write(f"📆 **التاريخ:** {rec['eval_date']}")
 
                 st.markdown("---")
+                st.markdown('<h3>🎯 عناصر التقييم الصفي الـ 20 والدرجات المسترجعة</h3>', unsafe_allow_html=True)
+
+                # عرض جدول مستويات الأداء
+                st.markdown("""
+                <div class="badge-container">
+                    <span style="font-weight:800; color:#1e3a8a; margin-left:15px;">مستويات الأداء والدرجات المسترجعة:</span>
+                    <span class="badge-item badge-1">1: ضعيف</span>
+                    <span class="badge-item badge-2">2: مقبول</span>
+                    <span class="badge-item badge-3">3: جيد</span>
+                    <span class="badge-item badge-4">4: جيد جداً</span>
+                    <span class="badge-item badge-5">5: متميز</span>
+                </div>
+                """, unsafe_allow_html=True)
+
+                # ترويسة الجدول
+                st.markdown("""
+                <table class="eval-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 15%;">المجال</th>
+                            <th style="width: 5%;">م</th>
+                            <th style="width: 55%;">عناصر التقييم</th>
+                            <th style="width: 25%;">الدرجة الممنوحة (من 5)</th>
+                        </tr>
+                    </thead>
+                </table>
+                """, unsafe_allow_html=True)
+
+                # عرض بنود التقييم الـ 20 والدرجات المحفوظة كاملة
+                for item in rubric_items:
+                    item_score = rec.get(f"{item['id']}_score", 0)
+                    badge_class = f"badge-{item_score}" if item_score in [1, 2, 3, 4, 5] else "badge-5"
+                    
+                    col_t1, col_t2, col_t3, col_t4 = st.columns([1.5, 0.5, 5.5, 2.5])
+                    with col_t1:
+                        st.markdown(f"<div style='text-align:right; font-weight:700; color:#1e3a8a; padding-top:6px;'>{item['domain']}</div>", unsafe_allow_html=True)
+                    with col_t2:
+                        st.markdown(f"<div style='text-align:right; font-weight:700; padding-top:6px;'>{item['num']}</div>", unsafe_allow_html=True)
+                    with col_t3:
+                        st.markdown(f"<div style='text-align:right; padding-top:6px; color:#1e293b; line-height:1.5;'>{item['text']}</div>", unsafe_allow_html=True)
+                    with col_t4:
+                        st.markdown(f"<div style='text-align:center; padding-top:4px;'><span class='badge-item {badge_class}' style='display:inline-block; width:80px; text-align:center;'>{item_score} / 5</span></div>", unsafe_allow_html=True)
+                    st.markdown("<hr style='margin: 3px 0; border: 0.5px solid #f1f5f9;'>", unsafe_allow_html=True)
+
+                # ملخص المجموع والتوصيات
+                total_sc = rec['total_score']
+                perc = (total_sc / 100.0) * 100
                 st.markdown(f"""
-                <div style="background-color:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:12px; text-align:right;">
-                    <h4 style="color:#166534; margin:0;">📊 ملخص التقييم النهائي:</h4>
-                    <p style="font-size:20px; font-weight:800; color:#15803d; margin:5px 0 0 0;">المجموع الكلي: {rec['total_score']} من 100 درجات ({(int(rec['total_score'])):.1f}%)</p>
-                    <p style="color:#334155; margin-top:8px;"><b>التوصيات والملحوظات:</b> {rec['notes'] if rec['notes'] else 'لا يوجد'}</p>
+                <div style="background-color:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:12px; padding:16px; text-align:right; margin-top:15px;">
+                    <h4 style="color:#166534; margin:0; font-size:20px;">📊 النتيجة الكلية للاستمارة:</h4>
+                    <p style="font-size:22px; font-weight:900; color:#15803d; margin:6px 0 0 0;">المجموع الكلي: {total_sc} من 100 درجات ({perc:.1f}%)</p>
+                    <p style="color:#334155; margin-top:8px; font-size:16px;"><b>التوصيات والملحوظات:</b> {rec['notes'] if rec['notes'] else 'لا يوجد ملحوظات مسجلة.'}</p>
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -587,17 +544,31 @@ with tab2:
                 # الاعتمادات الرسمية للتوقيع
                 col_s1, col_s2, col_s3 = st.columns(3)
                 with col_s1:
-                    st.markdown(f"**المعلم المطلع:**\n\n{rec['signed_teacher']}\n\n__________________")
+                    st.markdown(f"""
+                    <div style="text-align:right; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
+                        <b>المعلم المطلع:</b><br>{rec['signed_teacher']}<br><br>التوقيع: __________________
+                    </div>
+                    """, unsafe_allow_html=True)
                 with col_s2:
-                    st.markdown(f"**وكيل الشؤون التعليمية:**\n\n{rec.get('signed_vp', 'محمد مبروك محمد السيد')}\n\n__________________")
+                    st.markdown(f"""
+                    <div style="text-align:right; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
+                        <b>وكيل الشؤون التعليمية:</b><br>{rec.get('signed_vp', 'محمد مبروك محمد السيد')}<br><br>التوقيع: __________________
+                    </div>
+                    """, unsafe_allow_html=True)
                 with col_s3:
-                    st.markdown(f"**مدير المدرسة:**\n\n{rec.get('signed_principal', 'إبراهيم بن موسى التميمي')}\n\n__________________")
+                    st.markdown(f"""
+                    <div style="text-align:right; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
+                        <b>مدير المدرسة:</b><br>{rec.get('signed_principal', 'إبراهيم بن موسى التميمي')}<br><br>التوقيع: __________________
+                    </div>
+                    """, unsafe_allow_html=True)
 
                 st.markdown("<br>", unsafe_allow_html=True)
+
+                # أزرار الإجراءات (طباعة كاملة / تعديل / حذف)
                 col_act1, col_act2, col_act3 = st.columns(3)
                 
                 with col_act1:
-                    if st.button("🖨️ طباعة الاستمارة (A4)", type="secondary", use_container_width=True, key="print_rec_btn_v7"):
+                    if st.button("🖨️ طباعة الاستمارة كاملة (A4)", type="secondary", use_container_width=True, key="print_rec_btn_v7"):
                         st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
                 
                 with col_act2:
@@ -690,11 +661,11 @@ with tab3:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# التبويب الرابع: التقارير العامة (Excel / PDF)
+# التبويب الرابع: التقارير العامة (Excel / PDF / حذف التقرير العام)
 # ==========================================
 with tab4:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
-    st.subheader("📑 التقرير العام لجميع المعلمين والتصدير")
+    st.subheader("📑 التقرير العام لجميع المعلمين والتصدير والإدارة")
     
     conn = sqlite3.connect(DB_FILE)
     df_all = pd.read_sql_query("SELECT * FROM evaluations ORDER BY id DESC", conn)
@@ -722,6 +693,27 @@ with tab4:
         with col_exp2:
             if st.button("🖨️ طباعة وتصدير التقرير الكلي (PDF)", use_container_width=True, key="print_all_btn_v7"):
                 st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
+
+        st.markdown("---")
+        st.subheader("🗑️ إدارة وقاعدة بيانات التقرير العام")
+        
+        with st.expander("⚠️ منطقة الخطر: حذف سجلات التقرير العام بالكامل"):
+            st.warning("تحذير: هذا الإجراء سيقوم بحذف جميع استمارات تقييم المعلمين المسجلة في قاعدة البيانات بشكل نهائي.")
+            confirm_delete_all = st.checkbox("أنا متأكد من رغبتي في مسح جميع البيانات والتقارير العامة", key="confirm_del_all_cb")
+            
+            if st.button("🚨 مفتاح حذف التقرير العام بالكامل", type="primary", use_container_width=True, key="btn_delete_all_evals"):
+                if confirm_delete_all:
+                    conn = sqlite3.connect(DB_FILE)
+                    c = conn.cursor()
+                    c.execute("DELETE FROM evaluations")
+                    conn.commit()
+                    conn.close()
+                    st.success("✅ تم حذف التقرير العام وجميع السجلات بنجاح من قاعدة البيانات!")
+                    st.session_state.pop('last_searched_id_v7', None)
+                    st.rerun()
+                else:
+                    st.error("⚠️ يرجى التأشير على مربع التأكيد أعلاه لتأكيد عملية الحذف.")
     else:
         st.info("ℹ️ لا توجد بيانات مسجلة في قاعدة البيانات حتى الآن.")
-    
+        
+    st.markdown('</div>', unsafe_allow_html=True)
