@@ -1,7 +1,10 @@
-import streamlit as st
-import pandas as pd
+import os
 import sqlite3
+import tempfile
 import datetime
+import pandas as pd
+import streamlit as st
+import streamlit.components.v1 as components
 from io import BytesIO
 
 # ==========================================
@@ -17,179 +20,76 @@ st.set_page_config(
 # كود التنسيق الجمالي المتقدم ودعم الجوال والطباعة A4
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
-
-html, body, [class*="css"], .stApp {
-    font-family: 'Tajawal', sans-serif !important;
-    direction: rtl;
-    text-align: right;
-    background-color: #f8fafc;
+/* Global RTL Direction & Text Alignment */
+html, body, [data-testid="stAppViewContainer"], .main, [data-testid="stSidebar"], [data-testid="stHeader"] {
+    direction: rtl !important;
+    text-align: right !important;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
-
-/* ترويسة رئيسية جذابة */
-.header-box {
-    background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%);
-    color: white;
-    padding: 22px;
-    border-radius: 16px;
-    text-align: center;
-    margin-bottom: 25px;
-    box-shadow: 0 8px 20px rgba(13, 148, 136, 0.2);
-}
-.header-box h1 {
-    color: #ffffff;
-    font-weight: 900;
-    margin: 0;
-    font-size: 26px;
-}
-.header-box h3 {
-    color: #fef08a;
-    margin-top: 8px;
-    font-weight: 700;
-    font-size: 18px;
-}
-
-/* بطاقات التنسيق الممركزة والبيانات الأساسية */
-.centered-card {
-    background-color: #ffffff;
-    border: 1px solid #e2e8f0;
-    border-radius: 16px;
-    padding: 24px;
-    margin: 0 auto 25px auto;
-    max-width: 1000px;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-}
-.centered-header {
-    text-align: center;
-    color: #1e3a8a;
-    font-weight: 700;
-    margin-bottom: 20px;
-    padding-bottom: 10px;
-    border-bottom: 2px solid #e2e8f0;
-}
-
-/* شكل جمالي متطور للقوائم المنسدلة والحقول */
-div[data-baseweb="select"] > div {
-    background-color: #ffffff !important;
-    border: 1.5px solid #cbd5e1 !important;
-    border-radius: 10px !important;
-    transition: all 0.3s ease !important;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
-}
-div[data-baseweb="select"] > div:hover {
-    border-color: #0d9488 !important;
-    box-shadow: 0 0 0 3px rgba(13, 148, 136, 0.15) !important;
-}
-div[data-baseweb="select"] span {
-    font-family: 'Tajawal', sans-serif !important;
-    font-weight: 600 !important;
-    color: #1e293b !important;
-}
-
-/* مدخلات النصوص والتواريخ */
-.stTextInput input, .stDateInput input, .stTextArea textarea {
-    border-radius: 10px !important;
-    border: 1.5px solid #cbd5e1 !important;
-    font-family: 'Tajawal', sans-serif !important;
+p, h1, h2, h3, h4, h5, h6, span, div, label, input, textarea, select, button, [data-baseweb="tab"] {
+    direction: rtl !important;
     text-align: right !important;
 }
-
-/* شارات وشريط دلالات مستويات التقييم */
+.stSelectbox, .stTextInput, .stTextArea, .stButton, .stForm, [data-testid="stSidebarNav"] {
+    direction: rtl !important;
+    text-align: right !important;
+}
+.stDataFrame, .stTable {
+    direction: rtl !important;
+}
+div[role="radiogroup"] {
+    direction: rtl !important;
+    text-align: right !important;
+}
+.stTabs [data-baseweb="tab-list"] {
+    direction: rtl !important;
+    justify-content: flex-start !important;
+}
+.centered-card {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 14px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 25px;
+}
 .badge-container {
     display: flex;
-    justify-content: flex-start;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
     margin-bottom: 15px;
-    padding: 10px 15px;
-    background-color: #f1f5f9;
-    border-radius: 10px;
-    direction: rtl;
+    flex-wrap: wrap;
 }
 .badge-item {
     padding: 4px 12px;
     border-radius: 20px;
-    font-weight: 700;
-    font-size: 14px;
+    font-size: 13px;
+    font-weight: bold;
 }
-.badge-1 { background-color: #fee2e2; color: #dc2626; }
-.badge-2 { background-color: #fef9c3; color: #ca8a04; }
-.badge-3 { background-color: #e0f2fe; color: #0369a1; }
+.badge-1 { background-color: #fee2e2; color: #991b1b; }
+.badge-2 { background-color: #ffedd5; color: #9a3412; }
+.badge-3 { background-color: #fef9c3; color: #854d0e; }
 .badge-4 { background-color: #dbeafe; color: #1e40af; }
-.badge-5 { background-color: #dcfce7; color: #16a34a; }
-
-/* جدول عناصر التقييم الصفي محاذى لليمين بالكامل */
-.eval-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 15px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    direction: rtl !important;
-}
+.badge-5 { background-color: #dcfce7; color: #166534; }
 .eval-table th {
-    background-color: #eff6ff;
-    color: #1e3a8a;
-    padding: 12px 15px;
-    font-weight: 800;
-    font-size: 15px;
-    border-bottom: 2px solid #dbeafe;
+    background-color: #1e3a8a !important;
+    color: #ffffff !important;
+    padding: 10px !important;
     text-align: right !important;
 }
-.eval-table td {
-    padding: 12px 15px;
-    border-bottom: 1px solid #f1f5f9;
-    text-align: right !important;
+.footer-credits {
+    text-align: center;
+    margin-top: 25px;
+    padding: 12px;
+    border-top: 1px dashed #cbd5e1;
+    font-size: 14px;
+    color: #475569;
+    font-weight: bold;
 }
-
-/* محاذاة أزرار الخيارات الراديو (Radio buttons) لليمين */
-div[role="radiogroup"] {
-    display: flex !important;
-    flex-direction: row-reverse !important;
-    justify-content: flex-end !important;
-    gap: 15px !important;
-}
-
-/* التوافق مع الجوال */
-@media (max-width: 768px) {
-    .header-box h1 { font-size: 20px; }
-    .header-box h3 { font-size: 15px; }
-    .centered-card { padding: 15px; }
-    div[data-testid="column"] { width: 100% !important; margin-bottom: 10px; }
-    div[role="radiogroup"] { gap: 8px !important; }
-}
-
-/* التنسيق المخصص للطباعة بحجم ورقة A4 portrait */
 @media print {
-    @page {
-        size: A4 portrait;
-        margin: 8mm 8mm 8mm 8mm;
-    }
-    body, .stApp {
-        background-color: white !important;
-        color: black !important;
-    }
-    .no-print, header, footer, [data-testid="stSidebar"], .stTabs [role="tablist"], button {
-        display: none !important;
-    }
-    .centered-card {
-        box-shadow: none !important;
-        border: 1px solid #666 !important;
-        max-width: 100% !important;
-        width: 100% !important;
-        padding: 8px !important;
-        margin: 0 !important;
-    }
-    .header-box {
-        background: #1e3a8a !important;
-        color: white !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-        padding: 12px !important;
-        border-radius: 6px !important;
-    }
+    body * { visibility: hidden !important; }
+    .print-report, .print-report * { visibility: visible !important; }
+    .no-print, [data-testid="stSidebar"], [data-testid="stHeader"], .footer-credits { display: none !important; }
 }
 </style>
 """, unsafe_allow_html=True)
@@ -203,38 +103,37 @@ def init_db():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     c.execute('''
-        CREATE TABLE IF NOT EXISTS evaluations (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            teacher_name TEXT,
-            specialization TEXT,
-            assigned_subjects TEXT,
-            selected_subject TEXT,
-            grade TEXT,
-            class_name TEXT,
-            semester TEXT,
-            session_num TEXT,
-            visit_num TEXT,
-            eval_date TEXT,
-            q1_score INTEGER, q2_score INTEGER, q3_score INTEGER, q4_score INTEGER,
-            q5_score INTEGER, q6_score INTEGER, q7_score INTEGER, q8_score INTEGER,
-            q9_score INTEGER, q10_score INTEGER, q11_score INTEGER, q12_score INTEGER,
-            q13_score INTEGER, q14_score INTEGER, q15_score INTEGER, q16_score INTEGER,
-            q17_score INTEGER, q18_score INTEGER, q19_score INTEGER, q20_score INTEGER,
-            total_score INTEGER,
-            notes TEXT,
-            signed_teacher TEXT,
-            signed_vp TEXT,
-            signed_principal TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
+    CREATE TABLE IF NOT EXISTS evaluations (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        teacher_name TEXT,
+        specialization TEXT,
+        assigned_subjects TEXT,
+        selected_subject TEXT,
+        grade TEXT,
+        class_name TEXT,
+        semester TEXT,
+        session_num TEXT,
+        visit_num TEXT,
+        eval_date TEXT,
+        q1_score INTEGER, q2_score INTEGER, q3_score INTEGER, q4_score INTEGER, q5_score INTEGER,
+        q6_score INTEGER, q7_score INTEGER, q8_score INTEGER, q9_score INTEGER, q10_score INTEGER,
+        q11_score INTEGER, q12_score INTEGER, q13_score INTEGER, q14_score INTEGER, q15_score INTEGER,
+        q16_score INTEGER, q17_score INTEGER, q18_score INTEGER, q19_score INTEGER, q20_score INTEGER,
+        total_score INTEGER,
+        notes TEXT,
+        signed_teacher TEXT,
+        signed_vp TEXT,
+        signed_principal TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    )
     ''')
     c.execute('''
-        CREATE TABLE IF NOT EXISTS custom_teachers (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            teacher_name TEXT UNIQUE,
-            specialization TEXT,
-            assigned_subjects TEXT
-        )
+    CREATE TABLE IF NOT EXISTS custom_teachers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        teacher_name TEXT UNIQUE,
+        specialization TEXT,
+        assigned_subjects TEXT
+    )
     ''')
     conn.commit()
     conn.close()
@@ -283,7 +182,6 @@ SEMESTERS_LIST = ["الفصل الدراسي الأول", "الفصل الدرا
 SESSIONS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة"]
 VISITS_LIST = ["الأولى", "الثانية", "الثالثة", "الرابعة", "الخامسة", "السادسة", "السابعة", "الثامنة"]
 
-# تهيئة عداد إعادة الضبط للاستمارة الجديدة
 if 'form_reset_count' not in st.session_state:
     st.session_state['form_reset_count'] = 0
 
@@ -291,9 +189,9 @@ if 'form_reset_count' not in st.session_state:
 # 4. ترويسة البرنامج الرئيسية
 # ==========================================
 st.markdown("""
-<div class="header-box">
-    <h1>مدارس الثغر النموذجية الأهلية - القسم المتوسط</h1>
-    <h3>نظام المتابعة الصفية والإشرافية للمعلمين</h3>
+<div style="background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%); padding:20px; border-radius:14px; text-align:center; color:white; margin-bottom:20px;">
+    <h2 style="margin:0; color:white; font-weight:800;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
+    <h4 style="margin:5px 0 0 0; color:#f0fdf4;">نظام المتابعة الصفية والإشرافية وتقييم الأداء المتكامل</h4>
 </div>
 """, unsafe_allow_html=True)
 
@@ -322,12 +220,12 @@ with tab1:
 
     teachers_data = get_all_teachers()
     teacher_names = list(teachers_data.keys())
-    
+
     cnt = st.session_state['form_reset_count']
-    
+
     # اختيار المعلم والربط الديناميكي الفوري بالتخصص والمواد
     col_top1, col_top2, col_top3 = st.columns(3)
-    
+
     with col_top1:
         selected_teacher = st.selectbox("اختر اسم المعلم:", teacher_names, key=f"eval_teacher_sel_{cnt}")
         teacher_info = teachers_data[selected_teacher]
@@ -358,7 +256,7 @@ with tab1:
 
     st.markdown("---")
     st.markdown('<h3>🎯 عناصر التقييم الصفي الـ 20 (افتراضياً 5 درجات لكل بند = 100/100)</h3>', unsafe_allow_html=True)
-    
+
     st.markdown("""
     <div class="badge-container">
         <span style="font-weight:800; color:#1e3a8a; margin-left:15px;">مستويات الأداء والدرجات (من 1 إلى 5 درجات لكل بند):</span>
@@ -369,8 +267,7 @@ with tab1:
         <span class="badge-item badge-5">5: متميز</span>
     </div>
     """, unsafe_allow_html=True)
-    
-    # قائمة البنود الـ 20 الكاملة من المصدر
+
     rubric_items = [
         # المجال الأول: التخطيط
         {"id": "q1", "domain": "التخطيط", "num": 1, "text": "يخطط المعلم/ة للدرس على المنصة تخطيطا متوافقا مع الخطة الفصلية للمقرر."},
@@ -398,9 +295,9 @@ with tab1:
         {"id": "q19", "domain": "الشخصية المتوازنة", "num": 19, "text": "يبادر المتعلمون للتعبير عن أفكارهم وآرائهم بثقة ووضوح في بيئة التعلم."},
         {"id": "q20", "domain": "الشخصية المتوازنة", "num": 20, "text": "القدرة على إدارة وضبط النظام داخل الصف وفق القواعد التنظيمية."}
     ]
-    
+
     scores = {}
-    
+
     st.markdown("""
     <table class="eval-table">
         <thead>
@@ -413,7 +310,7 @@ with tab1:
         </thead>
     </table>
     """, unsafe_allow_html=True)
-    
+
     for item in rubric_items:
         col_t1, col_t2, col_t3, col_t4 = st.columns([1.5, 0.5, 5.0, 3.0])
         with col_t1:
@@ -423,22 +320,20 @@ with tab1:
         with col_t3:
             st.markdown(f"<div style='text-align:right; padding-top:8px; color:#1e293b; line-height:1.5;'>{item['text']}</div>", unsafe_allow_html=True)
         with col_t4:
-            # افتراضياً على الخيار رقم 5 (متميز - index 4) لتظهر الدرجة كاملة 100/100
             scores[item['id']] = st.radio(
                 f"الدرجة {item['num']}",
                 options=[1, 2, 3, 4, 5],
-                index=4, # الخيار رقم 5 بشكل افتراضي كامل
+                index=4,
                 horizontal=True,
                 key=f"radio_item_{item['id']}_cnt_{cnt}",
                 label_visibility="collapsed"
             )
         st.markdown("<hr style='margin: 3px 0; border: 0.5px solid #f1f5f9;'>", unsafe_allow_html=True)
 
-    # احتساب المجموع النهائي من 100 درجة (20 بند × 5 درجات = 100)
     total_val = sum(scores.values())
     max_val = 100
     percentage = (total_val / max_val) * 100
-    
+
     st.markdown(f"""
     <div style="background-color:#f0fdf4; border:2px solid #bbf7d0; border-radius:14px; padding:18px; text-align:center !important; margin-top:20px; box-shadow:0 4px 12px rgba(22, 163, 74, 0.1);">
         <span style="font-size:22px; font-weight:900; color:#166534;">🌟 المجموع الكلي لدرجات المعلم: {total_val} من {max_val} درجات ({percentage:.1f}%)</span>
@@ -449,9 +344,9 @@ with tab1:
 
     st.markdown("---")
     st.subheader("✍️ الاعتمادات والتوقيعات الرسمية")
-    
+
     col_sig1, col_sig2, col_sig3 = st.columns(3)
-    
+
     with col_sig1:
         st.markdown(f"""
         <div style="text-align:right; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
@@ -480,13 +375,20 @@ with tab1:
         """, unsafe_allow_html=True)
 
     st.markdown("<br>", unsafe_allow_html=True)
-    
+
     col_save_btn1, col_save_btn2 = st.columns(2)
     with col_save_btn1:
         submit_save = st.button("💾 حفظ استمارة التقييم الحالية (من 100)", type="primary", use_container_width=True, key=f"save_eval_btn_{cnt}")
     with col_save_btn2:
         if st.button("🖨️ طباعة الاستمارة مباشرة (A4)", type="secondary", use_container_width=True, key=f"print_eval_btn_{cnt}"):
             st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
+
+    # إضافة تصميم وتطوير المعلم / محمد سامي السعيد تحت أزرار الحفظ والطباعة مباشرة
+    st.markdown("""
+    <div style="text-align: center; margin-top: 15px; padding: 10px; border-top: 1px dashed #cbd5e1; font-size: 14px; color: #475569; font-weight: bold;">
+        💻 تصميم وتطوير المعلم / محمد سامي السعيد
+    </div>
+    """, unsafe_allow_html=True)
 
     if submit_save:
         conn = sqlite3.connect(DB_FILE)
@@ -510,7 +412,6 @@ with tab1:
         conn.commit()
         conn.close()
         st.success(f"✅ تم حفظ استمارة تقييم المعلم ({selected_teacher}) للتخصص ({teacher_spec}) بنجاح! المجموع: {total_val} من 100.")
-        # تعيين استمارة جديدة فارغة ومحددة على 100 درجات تلقائياً بعد الحفظ
         st.session_state['form_reset_count'] += 1
         st.rerun()
 
@@ -522,10 +423,10 @@ with tab1:
 with tab2:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
     st.subheader("🔍 البحث عن استمارة تقييم وإدارتها (تعديل / حذف / طباعة)")
-    
+
     teachers_data = get_all_teachers()
     t_list = list(teachers_data.keys())
-    
+
     if t_list:
         col_f1, col_f2, col_f3 = st.columns(3)
         with col_f1:
@@ -549,7 +450,6 @@ with tab2:
                 rec_id = int(rec['id'])
                 st.session_state['last_searched_id_v7'] = rec_id
                 
-                # عرض بطاقة الاستمارة المسترجعة بشكل برمجى نظيف ودون أي تسريب لأكواد HTML
                 st.markdown("""
                 <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:22px; background-color:#ffffff; direction:rtl; text-align:right;">
                     <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin-bottom:5px;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
@@ -558,7 +458,6 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
 
-                # عرض تفاصيل البيانات الأساسية باستخدام أعمدة Streamlit النظيفة بدلاً من جداول HTML المعقدة
                 col_info1, col_info2, col_info3 = st.columns(3)
                 with col_info1:
                     st.write(f"👤 **اسم المعلم:** {rec['teacher_name']}")
@@ -584,7 +483,6 @@ with tab2:
 
                 st.markdown("<br>", unsafe_allow_html=True)
                 
-                # الاعتمادات الرسمية للتوقيع
                 col_s1, col_s2, col_s3 = st.columns(3)
                 with col_s1:
                     st.markdown(f"**المعلم المطلع:**\n\n{rec['signed_teacher']}\n\n__________________")
@@ -606,7 +504,6 @@ with tab2:
                 with col_act3:
                     show_delete = st.button("🗑️ حذف هذه الاستمارة", type="primary", use_container_width=True, key="btn_show_del_v7")
 
-                # إجراء الحذف
                 if show_delete:
                     conn = sqlite3.connect(DB_FILE)
                     c = conn.cursor()
@@ -617,7 +514,6 @@ with tab2:
                     st.session_state.pop('last_searched_id_v7', None)
                     st.rerun()
 
-                # إجراء التعديل
                 if show_edit or st.session_state.get(f'editing_v7_{rec_id}'):
                     st.session_state[f'editing_v7_{rec_id}'] = True
                     st.markdown("---")
@@ -650,7 +546,7 @@ with tab2:
 with tab3:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
     st.subheader("➕ إضافة معلم جديد إلى قائمة النظام")
-    
+
     with st.form("add_teacher_form_v7", clear_on_submit=True):
         col_t1, col_t2, col_t3 = st.columns(3)
         with col_t1:
@@ -695,7 +591,7 @@ with tab3:
 with tab4:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
     st.subheader("📑 التقرير العام لجميع المعلمين والتصدير")
-    
+
     conn = sqlite3.connect(DB_FILE)
     df_all = pd.read_sql_query("SELECT * FROM evaluations ORDER BY id DESC", conn)
     conn.close()
@@ -727,5 +623,9 @@ with tab4:
         
     st.markdown('</div>', unsafe_allow_html=True)
 
-     
-
+# Footer Credits at bottom of main application page
+st.markdown("""
+<div class="footer-credits">
+    💻 تصميم وتطوير المعلم / محمد سامي السعيد
+</div>
+""", unsafe_allow_html=True)
