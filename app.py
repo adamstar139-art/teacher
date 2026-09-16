@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# كود التنسيق الجمالي المتقدم ودعم الجوال والطباعة A4
+# كود التنسيق الجمالي المتقدم ودعم الجوال والطباعة النظيفة A4
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
@@ -85,23 +85,31 @@ st.markdown("""
     .badge-4 { background-color: #3b82f6; }
     .badge-5 { background-color: #22c55e; }
 
-    /* تحسينات الطباعة A4 */
+    /* تحسينات الطباعة A4 لعرض الاستمارة فقط وإخفاء باقي الواجهة */
     @media print {
-        body {
+        body, [data-testid="stAppViewContainer"], .main {
             background-color: white !important;
             color: black !important;
         }
-        .stButton, .stDownloadButton, header, footer, [data-testid="stSidebar"], .stTabs [role="tablist"] {
+        
+        /* إخفاء الترويسة الرئيسية والشريط الجانبي والتبويبات والأزرار والبحث وحقول الإدخال */
+        header, footer, [data-testid="stSidebar"], .stTabs [role="tablist"], .no-print, .stButton, .stDownloadButton, [data-testid="stForm"], .stAlert, [data-testid="stSelectbox"], .main-header-banner {
             display: none !important;
         }
+        
         .centered-card {
             box-shadow: none !important;
             border: none !important;
             padding: 0 !important;
+            margin: 0 !important;
+            background: transparent !important;
         }
-        .no-print {
+        
+        /* إخفاء شريط إدخال الدرجات التفاعلي Radio في الطباعة */
+        [data-testid="stRadio"] {
             display: none !important;
         }
+
         @page {
             size: A4 portrait;
             margin: 10mm;
@@ -231,10 +239,10 @@ if 'form_reset_count' not in st.session_state:
     st.session_state['form_reset_count'] = 0
 
 # ==========================================
-# 4. ترويسة البرنامج الرئيسية
+# 4. ترويسة البرنامج الرئيسية (مخفية في الطباعة)
 # ==========================================
 st.markdown("""
-<div style="text-align:center; padding: 15px; background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%); border-radius:16px; color:white; margin-bottom: 25px;">
+<div class="main-header-banner no-print" style="text-align:center; padding: 15px; background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%); border-radius:16px; color:white; margin-bottom: 25px;">
     <h1 style="margin:0; font-weight:900; font-size:28px; color:white;">🏫 مدارس الثغر النموذجية الأهلية - القسم المتوسط</h1>
     <h3 style="margin:5px 0 0 0; font-weight:700; font-size:18px; color:#e0f2fe;">📋 نظام المتابعة الصفية والتقييم الإشرافي للزيارات التعليمية</h3>
 </div>
@@ -302,7 +310,7 @@ with tab1:
     st.markdown('<h3>🎯 عناصر التقييم الصفي الـ 20 (افتراضياً 5 درجات لكل بند = 100/100)</h3>', unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="badge-container">
+    <div class="badge-container no-print">
         <span style="font-weight:800; color:#1e3a8a; margin-left:15px;">مستويات الأداء والدرجات (من 1 إلى 5 درجات لكل بند):</span>
         <span class="badge-item badge-1">1: ضعيف</span>
         <span class="badge-item badge-2">2: مقبول</span>
@@ -427,11 +435,11 @@ with tab1:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# التبويب الثاني: استرجاع وتعديل / حذف استمارة (مع عرض الاستمارة كاملة الـ 20 بنداً)
+# التبويب الثاني: استرجاع وتعديل / حذف استمارة (طباعة خاصة بنص العنوان المطلوب والبيانات والتوقيع فقط)
 # ==========================================
 with tab2:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
-    st.subheader("🔍 البحث عن استمارة تقييم وإدارتها (عرض كامل / تعديل / حذف / طباعة)")
+    st.markdown('<div class="no-print"><h3 style="color:#1e3a8a; font-weight:800; margin-bottom:15px;">🔍 البحث عن استمارة تقييم وإدارتها (عرض كامل / تعديل / حذف / طباعة)</h3></div>', unsafe_allow_html=True)
     
     teachers_data = get_all_teachers()
     t_list = list(teachers_data.keys())
@@ -459,46 +467,40 @@ with tab2:
                 rec_id = int(rec['id'])
                 st.session_state['last_searched_id_v7'] = rec_id
                 
-                # الترويسة الرسمية للاستمارة المسترجعة للطباعة الكاملة
+                # 1. العنوان المخصص للاستمارة عند الطباعة
                 st.markdown("""
-                <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:22px; background-color:#ffffff; direction:rtl; text-align:right;">
-                    <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin-bottom:5px;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
-                    <h4 style="text-align:center; color:#0d9488; font-weight:700; margin-top:0;">📋 استمارة تقييم الأداء الصفي والزيارة الإشرافية الكاملة (20 بنداً - 100 درجة)</h4>
-                    <hr style="border-top: 2px solid #0d9488; margin: 15px 0;">
+                <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:20px; background-color:#ffffff; direction:rtl; text-align:center; margin-bottom: 20px;">
+                    <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin:0 0 6px 0; font-size:24px;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
+                    <h3 style="text-align:center; color:#0d9488; font-weight:800; margin:0; font-size:20px;">📋 استمارة الملاحظة الصفية والإشرافية</h3>
                 </div>
                 """, unsafe_allow_html=True)
 
-                # تفاصيل البيانات الأساسية
-                col_info1, col_info2, col_info3 = st.columns(3)
-                with col_info1:
-                    st.write(f"👤 **اسم المعلم:** {rec['teacher_name']}")
-                    st.write(f"🏫 **الصف:** {rec['grade']}")
-                    st.write(f"⏱️ **الحصة:** {rec['session_num']}")
-                with col_info2:
-                    st.write(f"📌 **التخصص:** {rec['specialization']}")
-                    st.write(f"🚪 **الفصل:** {rec['class_name']}")
-                    st.write(f"🔢 **رقم الزيارة:** {rec['visit_num']}")
-                with col_info3:
-                    st.write(f"📘 **المادة المزارة:** {rec['selected_subject']}")
-                    st.write(f"📅 **الفصل الدراسي:** {rec.get('semester', 'الأول')}")
-                    st.write(f"📆 **التاريخ:** {rec['eval_date']}")
-
-                st.markdown("---")
-                st.markdown('<h3>🎯 عناصر التقييم الصفي الـ 20 والدرجات المسترجعة</h3>', unsafe_allow_html=True)
-
-                # عرض جدول مستويات الأداء
-                st.markdown("""
-                <div class="badge-container">
-                    <span style="font-weight:800; color:#1e3a8a; margin-left:15px;">مستويات الأداء والدرجات المسترجعة:</span>
-                    <span class="badge-item badge-1">1: ضعيف</span>
-                    <span class="badge-item badge-2">2: مقبول</span>
-                    <span class="badge-item badge-3">3: جيد</span>
-                    <span class="badge-item badge-4">4: جيد جداً</span>
-                    <span class="badge-item badge-5">5: متميز</span>
+                # 2. جدول بيانات المعلم والزيارة النظيف المنظم
+                st.markdown(f"""
+                <div style="border: 1px solid #cbd5e1; border-radius:12px; padding:15px; background-color:#f8fafc; margin-bottom:20px; direction:rtl; text-align:right;">
+                    <table style="width:100%; border-collapse:collapse; font-size:15px; color:#0f172a;">
+                        <tr>
+                            <td style="padding:6px; width:33%;">👤 <b>اسم المعلم:</b> {rec['teacher_name']}</td>
+                            <td style="padding:6px; width:33%;">📌 <b>التخصص:</b> {rec['specialization']}</td>
+                            <td style="padding:6px; width:33%;">📘 <b>المادة المزارة:</b> {rec['selected_subject']}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:6px;">🏫 <b>الصف:</b> {rec['grade']}</td>
+                            <td style="padding:6px;">🚪 <b>الفصل:</b> {rec['class_name']}</td>
+                            <td style="padding:6px;">📅 <b>الفصل الدراسي:</b> {rec.get('semester', 'الأول')}</td>
+                        </tr>
+                        <tr>
+                            <td style="padding:6px;">⏱️ <b>الحصة:</b> {rec['session_num']}</td>
+                            <td style="padding:6px;">🔢 <b>رقم الزيارة:</b> {rec['visit_num']}</td>
+                            <td style="padding:6px;">📆 <b>التاريخ:</b> {rec['eval_date']}</td>
+                        </tr>
+                    </table>
                 </div>
                 """, unsafe_allow_html=True)
 
-                # ترويسة الجدول
+                st.markdown('<h3 style="color:#1e3a8a; font-weight:800;">🎯 عناصر التقييم الصفي الـ 20 والدرجات المسجلة</h3>', unsafe_allow_html=True)
+
+                # ترويسة جدول عناصر التقييم
                 st.markdown("""
                 <table class="eval-table">
                     <thead>
@@ -512,7 +514,7 @@ with tab2:
                 </table>
                 """, unsafe_allow_html=True)
 
-                # عرض بنود التقييم الـ 20 والدرجات المحفوظة كاملة
+                # 3. عرض بنود التقييم الـ 20 والدرجات المحفوظة كاملة
                 for item in rubric_items:
                     item_score = rec.get(f"{item['id']}_score", 0)
                     badge_class = f"badge-{item_score}" if item_score in [1, 2, 3, 4, 5] else "badge-5"
@@ -539,32 +541,41 @@ with tab2:
                 </div>
                 """, unsafe_allow_html=True)
 
-                st.markdown("<br>", unsafe_allow_html=True)
-                
-                # الاعتمادات الرسمية للتوقيع
-                col_s1, col_s2, col_s3 = st.columns(3)
-                with col_s1:
-                    st.markdown(f"""
-                    <div style="text-align:right; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
-                        <b>المعلم المطلع:</b><br>{rec['signed_teacher']}<br><br>التوقيع: __________________
-                    </div>
-                    """, unsafe_allow_html=True)
-                with col_s2:
-                    st.markdown(f"""
-                    <div style="text-align:right; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
-                        <b>وكيل الشؤون التعليمية:</b><br>{rec.get('signed_vp', 'محمد مبروك محمد السيد')}<br><br>التوقيع: __________________
-                    </div>
-                    """, unsafe_allow_html=True)
-                with col_s3:
-                    st.markdown(f"""
-                    <div style="text-align:right; background:#f8fafc; padding:12px; border-radius:10px; border:1px solid #cbd5e1;">
-                        <b>مدير المدرسة:</b><br>{rec.get('signed_principal', 'إبراهيم بن موسى التميمي')}<br><br>التوقيع: __________________
-                    </div>
-                    """, unsafe_allow_html=True)
+                # 4. الاعتمادات والتوقيعات الرسمية في أسفل الاستمارة
+                st.markdown(f"""
+                <div style="margin-top:25px; page-break-inside:avoid; direction:rtl;">
+                    <table style="width:100%; border-collapse:collapse; text-align:right;">
+                        <tr>
+                            <td style="width:33%; padding:8px; vertical-align:top;">
+                                <div style="border:1px solid #cbd5e1; border-radius:10px; padding:12px; background:#f8fafc;">
+                                    <b style="color:#1e3a8a;">المعلم المطلع:</b><br>
+                                    <span style="font-weight:700;">{rec['signed_teacher']}</span><br><br>
+                                    <span style="color:#64748b;">التوقيع: __________________</span>
+                                </div>
+                            </td>
+                            <td style="width:33%; padding:8px; vertical-align:top;">
+                                <div style="border:1px solid #cbd5e1; border-radius:10px; padding:12px; background:#f8fafc;">
+                                    <b style="color:#1e3a8a;">وكيل الشؤون التعليمية:</b><br>
+                                    <span style="font-weight:700;">{rec.get('signed_vp', 'محمد مبروك محمد السيد')}</span><br><br>
+                                    <span style="color:#64748b;">التوقيع: __________________</span>
+                                </div>
+                            </td>
+                            <td style="width:33%; padding:8px; vertical-align:top;">
+                                <div style="border:1px solid #cbd5e1; border-radius:10px; padding:12px; background:#f8fafc;">
+                                    <b style="color:#1e3a8a;">مدير المدرسة:</b><br>
+                                    <span style="font-weight:700;">{rec.get('signed_principal', 'إبراهيم بن موسى التميمي')}</span><br><br>
+                                    <span style="color:#64748b;">التوقيع: __________________</span>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                """, unsafe_allow_html=True)
 
                 st.markdown("<br>", unsafe_allow_html=True)
 
-                # أزرار الإجراءات (طباعة كاملة / تعديل / حذف)
+                # 5. أزرار الإجراءات ومربع التعديل (تختفي تماماً عند الطباعة بفضل فئة no-print)
+                st.markdown('<div class="no-print">', unsafe_allow_html=True)
                 col_act1, col_act2, col_act3 = st.columns(3)
                 
                 with col_act1:
@@ -608,6 +619,7 @@ with tab2:
                             st.success("✅ تم تحديث بيانات الاستمارة بنجاح!")
                             st.session_state.pop(f'editing_v7_{rec_id}', None)
                             st.rerun()
+                st.markdown('</div>', unsafe_allow_html=True)
             else:
                 st.warning("⚠️ لم يتم العثور على استمارة تقييم مسجلة لهذا المعلم في الزيارة المحددة.")
     else:
