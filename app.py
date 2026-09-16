@@ -725,8 +725,9 @@ with tab4:
     else:
         st.info("ℹ️ لا توجد بيانات مسجلة في قاعدة البيانات حتى الآن.")
         
-   st.markdown("""
-    <div style="text-align: center; font-weight: bold;">
+  footer_html = """
+    <div style="text-align: center;">
         💻 تصميم وتطوير المعلم / محمد سامي السعيد
     </div>
-""", unsafe_allow_html=True)
+"""
+st.markdown(footer_html, unsafe_allow_html=True)
