@@ -725,8 +725,8 @@ with tab4:
     else:
         st.info("ℹ️ لا توجد بيانات مسجلة في قاعدة البيانات حتى الآن.")
         
-    st.markdown('</div>', unsafe_allow_html=True)
-<div class="footer-credits">
-st.caption("💻 تصميم وتطوير المعلم / محمد سامي السعيد")
-</div>
+   st.markdown("""
+    <div style="text-align: center; font-weight: bold;">
+        💻 تصميم وتطوير المعلم / محمد سامي السعيد
+    </div>
 """, unsafe_allow_html=True)
