@@ -727,7 +727,7 @@ with tab4:
   st.markdown(report_html, unsafe_allow_html=True)
 
 # Footer Credits at bottom of main application page
-st.markdown("""
+    st.markdown("""
 <div class="footer-credits">
 💻 تصميم وتطوير المعلم / محمد سامي السعيد
 </div>
