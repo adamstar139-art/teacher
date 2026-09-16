@@ -724,10 +724,11 @@ with tab4:
                 st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
     else:
         st.info("ℹ️ لا توجد بيانات مسجلة في قاعدة البيانات حتى الآن.")
-        
-  footer_html = """
-    <div style="text-align: center;">
-        💻 تصميم وتطوير المعلم / محمد سامي السعيد
-    </div>
-"""
-st.markdown(footer_html, unsafe_allow_html=True)
+  st.markdown(report_html, unsafe_allow_html=True)
+
+# Footer Credits at bottom of main application page
+st.markdown("""
+<div class="footer-credits">
+💻 تصميم وتطوير المعلم / محمد سامي السعيد
+</div>
+""", unsafe_allow_html=True)
