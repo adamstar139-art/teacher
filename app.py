@@ -727,6 +727,6 @@ with tab4:
         
     st.markdown('</div>', unsafe_allow_html=True)
 <div class="footer-credits">
-    💻 تصميم وتطوير المعلم / محمد سامي السعيد
+st.caption("💻 تصميم وتطوير المعلم / محمد سامي السعيد")
 </div>
 """, unsafe_allow_html=True)
