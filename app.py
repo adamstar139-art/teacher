@@ -14,7 +14,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# كود التنسيق الجمالي المتقدم ودعم الجوال والطباعة A4 المخصصة لـ صفحتين بالضبط
+# كود التنسيق الجمالي المتقدم ودعم الجوال والطباعة A4
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap');
@@ -42,21 +42,21 @@ st.markdown("""
     .eval-table {
         width: 100%;
         border-collapse: collapse;
-        margin-top: 10px;
-        margin-bottom: 10px;
+        margin-top: 15px;
+        margin-bottom: 15px;
         direction: rtl;
     }
     .eval-table th {
         background-color: #1e3a8a;
         color: white;
-        padding: 10px;
+        padding: 12px;
         text-align: right;
         font-weight: 700;
-        font-size: 14px;
+        font-size: 15px;
         border: 1px solid #1e3a8a;
     }
     .eval-table td {
-        padding: 8px;
+        padding: 10px;
         border: 1px solid #e2e8f0;
         text-align: right;
     }
@@ -69,11 +69,11 @@ st.markdown("""
         display: flex;
         gap: 10px;
         align-items: center;
-        margin-bottom: 12px;
+        margin-bottom: 15px;
         flex-wrap: wrap;
     }
     .badge-item {
-        padding: 5px 12px;
+        padding: 6px 14px;
         border-radius: 20px;
         font-weight: 700;
         font-size: 13px;
@@ -85,38 +85,43 @@ st.markdown("""
     .badge-4 { background-color: #3b82f6; }
     .badge-5 { background-color: #22c55e; }
 
-    /* فاصل الصفحات عند الطباعة لتحديد طباعة الاستمارة على صفحتين بالضبط */
-    .page-break {
-        page-break-before: always !important;
-        break-before: page !important;
+    /* تحسينات طباعة الصفحة A4 النظيفة */
+    @media screen {
+        .print-only {
+            display: none !important;
+        }
     }
-
-    /* تحسينات الطباعة A4 الهيكلية المخصصة (صفحتان فقط) */
+    
     @media print {
         body {
             background-color: white !important;
             color: black !important;
-            font-size: 12px !important;
         }
-        .stButton, .stDownloadButton, header, footer, [data-testid="stSidebar"], .stTabs [role="tablist"], .no-print {
+        .no-print, 
+        .stButton, 
+        .stDownloadButton, 
+        header, 
+        footer, 
+        [data-testid="stSidebar"], 
+        .stTabs [role="tablist"],
+        .stSelectbox, 
+        .stRadio, 
+        .stTextArea, 
+        .stTextInput, 
+        .stDateInput {
             display: none !important;
         }
         .centered-card {
             box-shadow: none !important;
             border: none !important;
             padding: 0 !important;
-            margin: 0 !important;
+        }
+        .print-only {
+            display: block !important;
         }
         @page {
             size: A4 portrait;
-            margin: 8mm 10mm;
-        }
-        .eval-table th, .eval-table td {
-            padding: 4px 6px !important;
-            font-size: 11px !important;
-        }
-        hr {
-            margin: 2px 0 !important;
+            margin: 8mm;
         }
     }
 </style>
@@ -243,7 +248,7 @@ if 'form_reset_count' not in st.session_state:
     st.session_state['form_reset_count'] = 0
 
 # ==========================================
-# 4. ترويسة البرنامج الرئيسية (مخفية أثناء الطباعة عبر no-print)
+# 4. ترويسة البرنامج الرئيسية (مخفية عند الطباعة)
 # ==========================================
 st.markdown("""
 <div class="no-print" style="text-align:center; padding: 15px; background: linear-gradient(135deg, #1e3a8a 0%, #0d9488 100%); border-radius:16px; color:white; margin-bottom: 25px;">
@@ -265,18 +270,9 @@ tab1, tab2, tab3, tab4 = st.tabs([
 with tab1:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
     
-    # الترويسة المخصصة للطباعة والتي تظهر كعنوان رئيسي للاستمارة
-    st.markdown("""
-    <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:18px; background-color:#ffffff; direction:rtl; text-align:right; margin-bottom:15px;">
-        <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin-bottom:5px; margin-top:0;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
-        <h4 style="text-align:center; color:#0d9488; font-weight:700; margin-top:0; margin-bottom:0;">📋 استمارة الملاحظة الصفية والإشرافية</h4>
-        <hr style="border-top: 2px solid #0d9488; margin: 10px 0 0 0;">
-    </div>
-    """, unsafe_allow_html=True)
-    
     col_h1, col_h2 = st.columns([3, 1])
     with col_h1:
-        st.markdown('<h3 class="no-print" style="color:#1e3a8a; font-weight:800; margin:0;">📋 البيانات الأساسية للزيارة الصفية</h3>', unsafe_allow_html=True)
+        st.markdown('<h2 class="no-print" style="color:#1e3a8a; font-weight:800; margin:0;">📋 البيانات الأساسية للزيارة الصفية</h2>', unsafe_allow_html=True)
     with col_h2:
         if st.button("🔄 بدء استمارة جديدة (100 درجة)", type="secondary", use_container_width=True, key="reset_form_btn"):
             st.session_state['form_reset_count'] += 1
@@ -319,11 +315,11 @@ with tab1:
         selected_visit = st.selectbox("رقم الزيارة:", VISITS_LIST, key=f"eval_v_sel_{cnt}")
         today_date = st.date_input("التاريخ (ميلادي):", datetime.date.today(), key=f"eval_date_sel_{cnt}")
 
-    st.markdown("---")
-    st.markdown('<h3>🎯 عناصر التقييم الصفي الـ 20 (افتراضياً 5 درجات لكل بند = 100/100)</h3>', unsafe_allow_html=True)
+    st.markdown('<hr class="no-print">', unsafe_allow_html=True)
+    st.markdown('<h3 class="no-print">🎯 عناصر التقييم الصفي الـ 20 (افتراضياً 5 درجات لكل بند = 100/100)</h3>', unsafe_allow_html=True)
 
     st.markdown("""
-    <div class="badge-container">
+    <div class="badge-container no-print">
         <span style="font-weight:800; color:#1e3a8a; margin-left:15px;">مستويات الأداء والدرجات (من 1 إلى 5 درجات لكل بند):</span>
         <span class="badge-item badge-1">1: ضعيف</span>
         <span class="badge-item badge-2">2: مقبول</span>
@@ -336,7 +332,7 @@ with tab1:
     scores = {}
 
     st.markdown("""
-    <table class="eval-table">
+    <table class="eval-table no-print">
         <thead>
             <tr>
                 <th style="width: 15%;">المجال</th>
@@ -348,31 +344,14 @@ with tab1:
     </table>
     """, unsafe_allow_html=True)
 
-    # عرض الصفحة الأولى من العناصر (البنود من 1 إلى 10)
-    for idx, item in enumerate(rubric_items):
-        if idx == 10:
-            # إضافة فاصل الصفحات الهيكلي لتقسيم الطباعة على صفحتين بالضبط
-            st.markdown('<div class="page-break"></div>', unsafe_allow_html=True)
-            st.markdown("""
-            <table class="eval-table" style="margin-top:10px;">
-                <thead>
-                    <tr>
-                        <th style="width: 15%;">المجال</th>
-                        <th style="width: 5%;">م</th>
-                        <th style="width: 50%;">عناصر التقييم (تابع)</th>
-                        <th style="width: 30%;">الدرجة المحددة (من 1 إلى 5 درجات)</th>
-                    </tr>
-                </thead>
-            </table>
-            """, unsafe_allow_html=True)
-            
+    for item in rubric_items:
         col_t1, col_t2, col_t3, col_t4 = st.columns([1.5, 0.5, 5.0, 3.0])
         with col_t1:
-            st.markdown(f"<div style='text-align:right; font-weight:700; color:#1e3a8a; padding-top:8px;'>{item['domain']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='no-print' style='text-align:right; font-weight:700; color:#1e3a8a; padding-top:8px;'>{item['domain']}</div>", unsafe_allow_html=True)
         with col_t2:
-            st.markdown(f"<div style='text-align:right; font-weight:700; padding-top:8px;'>{item['num']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='no-print' style='text-align:right; font-weight:700; padding-top:8px;'>{item['num']}</div>", unsafe_allow_html=True)
         with col_t3:
-            st.markdown(f"<div style='text-align:right; padding-top:8px; color:#1e293b; line-height:1.5;'>{item['text']}</div>", unsafe_allow_html=True)
+            st.markdown(f"<div class='no-print' style='text-align:right; padding-top:8px; color:#1e293b; line-height:1.5;'>{item['text']}</div>", unsafe_allow_html=True)
         with col_t4:
             scores[item['id']] = st.radio(
                 f"الدرجة {item['num']}",
@@ -382,28 +361,28 @@ with tab1:
                 key=f"radio_item_{item['id']}_cnt_{cnt}",
                 label_visibility="collapsed"
             )
-        st.markdown("<hr style='margin: 3px 0; border: 0.5px solid #f1f5f9;'>", unsafe_allow_html=True)
+        st.markdown("<hr class='no-print' style='margin: 3px 0; border: 0.5px solid #f1f5f9;'>", unsafe_allow_html=True)
 
     total_val = sum(scores.values())
     max_val = 100
     percentage = (total_val / max_val) * 100
 
     st.markdown(f"""
-    <div style="background-color:#f0fdf4; border:2px solid #bbf7d0; border-radius:14px; padding:18px; text-align:center !important; margin-top:20px; box-shadow:0 4px 12px rgba(22, 163, 74, 0.1);">
+    <div class="no-print" style="background-color:#f0fdf4; border:2px solid #bbf7d0; border-radius:14px; padding:18px; text-align:center !important; margin-top:20px; box-shadow:0 4px 12px rgba(22, 163, 74, 0.1);">
         <span style="font-size:22px; font-weight:900; color:#166534;">🌟 المجموع الكلي لدرجات المعلم: {total_val} من {max_val} درجات ({percentage:.1f}%)</span>
     </div>
     """, unsafe_allow_html=True)
 
     notes_input = st.text_area("توصيات وملحوظات المشرف الزائر:", key=f"notes_input_text_{cnt}")
 
-    st.markdown("---")
-    st.subheader("✍️ الاعتمادات والتوقيعات الرسمية")
+    st.markdown('<hr class="no-print">', unsafe_allow_html=True)
+    st.markdown('<h3 class="no-print">✍️ الاعتمادات والتوقيعات الرسمية</h3>', unsafe_allow_html=True)
 
     col_sig1, col_sig2, col_sig3 = st.columns(3)
 
     with col_sig1:
         st.markdown(f"""
-        <div style="text-align:right; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
+        <div class="no-print" style="text-align:right; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
             <h5 style="color:#1e3a8a; font-weight:800; margin-bottom:8px; text-align:right;">المعلم المطلع</h5>
             <p style="font-weight:700; color:#0f172a; margin-bottom:15px; text-align:right;">{selected_teacher}</p>
             <p style="color:#64748b; margin:0; text-align:right;">التوقيع: __________________</p>
@@ -412,7 +391,7 @@ with tab1:
         
     with col_sig2:
         st.markdown("""
-        <div style="text-align:right; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
+        <div class="no-print" style="text-align:right; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
             <h5 style="color:#1e3a8a; font-weight:800; margin-bottom:8px; text-align:right;">وكيل المدرسة للشؤون التعليمية</h5>
             <p style="font-weight:700; color:#0f172a; margin-bottom:15px; text-align:right;">محمد مبروك محمد السيد</p>
             <p style="color:#64748b; margin:0; text-align:right;">التوقيع: __________________</p>
@@ -421,7 +400,7 @@ with tab1:
         
     with col_sig3:
         st.markdown("""
-        <div style="text-align:right; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
+        <div class="no-print" style="text-align:right; background:#f8fafc; padding:15px; border-radius:12px; border:1px solid #cbd5e1;">
             <h5 style="color:#1e3a8a; font-weight:800; margin-bottom:8px; text-align:right;">مدير المدرسة</h5>
             <p style="font-weight:700; color:#0f172a; margin-bottom:15px; text-align:right;">إبراهيم بن موسى التميمي</p>
             <p style="color:#64748b; margin:0; text-align:right;">التوقيع: __________________</p>
@@ -436,6 +415,81 @@ with tab1:
     with col_save_btn2:
         if st.button("🖨️ طباعة الاستمارة مباشرة (A4)", type="secondary", use_container_width=True, key=f"print_eval_btn_{cnt}"):
             st.components.v1.html("""<script>setTimeout(function() { window.parent.print(); }, 300);</script>""", height=0)
+
+    # ==========================================
+    # بطاقة الطباعة الرسمية النظيفة للتبويب الأول (تظهر فقط عند الطباعة)
+    # ==========================================
+    print_rows_tab1 = ""
+    for item in rubric_items:
+        sc = scores[item['id']]
+        print_rows_tab1 += f"""
+        <tr>
+            <td style="padding:6px 10px; border:1px solid #cbd5e1; font-weight:700; color:#1e3a8a; font-size:13px;">{item['domain']}</td>
+            <td style="padding:6px 10px; border:1px solid #cbd5e1; text-align:center; font-weight:700; font-size:13px;">{item['num']}</td>
+            <td style="padding:6px 10px; border:1px solid #cbd5e1; font-size:13px; color:#1e293b;">{item['text']}</td>
+            <td style="padding:6px 10px; border:1px solid #cbd5e1; text-align:center; font-weight:800; font-size:13px; color:#166534;">{sc} / 5</td>
+        </tr>
+        """
+
+    st.markdown(f"""
+    <div class="print-only" style="direction:rtl; text-align:right; font-family:'Cairo', sans-serif;">
+        <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:20px; background-color:#ffffff; margin-bottom:15px;">
+            <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin-bottom:5px;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
+            <h4 style="text-align:center; color:#0d9488; font-weight:700; margin-top:0;">📋 استمارة الملاحظة الصفية والإشرافية</h4>
+            <hr style="border-top: 2px solid #0d9488; margin: 12px 0;">
+            
+            <table style="width:100%; margin-bottom:5px; font-size:14px; border-collapse:collapse;">
+                <tr>
+                    <td style="padding:4px;">👤 <b>اسم المعلم:</b> {selected_teacher}</td>
+                    <td style="padding:4px;">📌 <b>التخصص:</b> {teacher_spec}</td>
+                    <td style="padding:4px;">📘 <b>المادة المزارة:</b> {selected_subject}</td>
+                </tr>
+                <tr>
+                    <td style="padding:4px;">🏫 <b>الصف:</b> {selected_grade}</td>
+                    <td style="padding:4px;">🚪 <b>الفصل:</b> {selected_class}</td>
+                    <td style="padding:4px;">📅 <b>الفصل الدراسي:</b> {selected_semester}</td>
+                </tr>
+                <tr>
+                    <td style="padding:4px;">⏱️ <b>الحصة:</b> {selected_session}</td>
+                    <td style="padding:4px;">🔢 <b>رقم الزيارة:</b> {selected_visit}</td>
+                    <td style="padding:4px;">📆 <b>التاريخ:</b> {today_date}</td>
+                </tr>
+            </table>
+        </div>
+
+        <table style="width:100%; border-collapse:collapse; margin-bottom:15px;">
+            <thead>
+                <tr style="background-color:#1e3a8a; color:white;">
+                    <th style="padding:8px; border:1px solid #1e3a8a; width:15%; font-size:14px;">المجال</th>
+                    <th style="padding:8px; border:1px solid #1e3a8a; width:5%; font-size:14px;">م</th>
+                    <th style="padding:8px; border:1px solid #1e3a8a; width:60%; font-size:14px;">عناصر التقييم</th>
+                    <th style="padding:8px; border:1px solid #1e3a8a; width:20%; font-size:14px;">الدرجة الممنوحة (من 5)</th>
+                </tr>
+            </thead>
+            <tbody>
+                {print_rows_tab1}
+            </tbody>
+        </table>
+
+        <div style="background-color:#f0fdf4; border:1.5px solid #bbf7d0; border-radius:10px; padding:12px; margin-bottom:20px;">
+            <h4 style="color:#166534; margin:0; font-size:18px;">📊 النتيجة الكلية للاستمارة:</h4>
+            <p style="font-size:20px; font-weight:900; color:#15803d; margin:4px 0;">المجموع الكلي: {total_val} من 100 درجات ({percentage:.1f}%)</p>
+            <p style="color:#334155; margin:4px 0 0 0;"><b>التوصيات والملحوظات:</b> {notes_input if notes_input else 'لا يوجد ملحوظات مسجلة.'}</p>
+        </div>
+
+        <div style="display:flex; justify-content:space-between; margin-top:20px; text-align:center;">
+            <div style="width:30%; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+                <b>المعلم المطلع:</b><br>{selected_teacher}<br><br>التوقيع: __________________
+            </div>
+            <div style="width:30%; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+                <b>وكيل الشؤون التعليمية:</b><br>محمد مبروك محمد السيد<br><br>التوقيع: __________________
+            </div>
+            <div style="width:30%; background:#f8fafc; padding:10px; border-radius:8px; border:1px solid #cbd5e1;">
+                <b>مدير المدرسة:</b><br>إبراهيم بن موسى التميمي<br><br>التوقيع: __________________
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     if submit_save:
         conn = sqlite3.connect(DB_FILE)
@@ -465,7 +519,7 @@ with tab1:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ==========================================
-# التبويب الثاني: استرجاع وتعديل / حذف استمارة (طباعة على صفحتين بالضبط)
+# التبويب الثاني: استرجاع وتعديل / حذف استمارة (مع عرض الاستمارة كاملة الـ 20 بنداً)
 # ==========================================
 with tab2:
     st.markdown('<div class="centered-card">', unsafe_allow_html=True)
@@ -499,10 +553,10 @@ with tab2:
                 
                 # الترويسة الرسمية للاستمارة المسترجعة للطباعة الكاملة
                 st.markdown("""
-                <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:18px; background-color:#ffffff; direction:rtl; text-align:right; margin-bottom:15px;">
-                    <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin-bottom:5px; margin-top:0;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
-                    <h4 style="text-align:center; color:#0d9488; font-weight:700; margin-top:0; margin-bottom:0;">📋 استمارة الملاحظة الصفية والإشرافية</h4>
-                    <hr style="border-top: 2px solid #0d9488; margin: 10px 0 0 0;">
+                <div style="border: 2px solid #1e3a8a; border-radius:14px; padding:22px; background-color:#ffffff; direction:rtl; text-align:right;">
+                    <h2 style="text-align:center; color:#1e3a8a; font-weight:900; margin-bottom:5px;">مدارس الثغر النموذجية الأهلية - القسم المتوسط</h2>
+                    <h4 style="text-align:center; color:#0d9488; font-weight:700; margin-top:0;">📋 استمارة الملاحظة الصفية والإشرافية</h4>
+                    <hr style="border-top: 2px solid #0d9488; margin: 15px 0;">
                 </div>
                 """, unsafe_allow_html=True)
 
@@ -526,7 +580,7 @@ with tab2:
 
                 # عرض جدول مستويات الأداء
                 st.markdown("""
-                <div class="badge-container">
+                <div class="badge-container no-print">
                     <span style="font-weight:800; color:#1e3a8a; margin-left:15px;">مستويات الأداء والدرجات المسترجعة:</span>
                     <span class="badge-item badge-1">1: ضعيف</span>
                     <span class="badge-item badge-2">2: مقبول</span>
@@ -550,24 +604,8 @@ with tab2:
                 </table>
                 """, unsafe_allow_html=True)
 
-                # عرض بنود التقييم الـ 20 مقسمة على صفحتين للطباعة
-                for idx, item in enumerate(rubric_items):
-                    if idx == 10:
-                        # إضافة فاصل الصفحات الهيكلي لطباعة الاستمارة على صفحتين بالضبط
-                        st.markdown('<div class="page-break"></div>', unsafe_allow_html=True)
-                        st.markdown("""
-                        <table class="eval-table" style="margin-top:10px;">
-                            <thead>
-                                <tr>
-                                    <th style="width: 15%;">المجال</th>
-                                    <th style="width: 5%;">م</th>
-                                    <th style="width: 55%;">عناصر التقييم (تابع)</th>
-                                    <th style="width: 25%;">الدرجة الممنوحة (من 5)</th>
-                                </tr>
-                            </thead>
-                        </table>
-                        """, unsafe_allow_html=True)
-                        
+                # عرض بنود التقييم الـ 20 والدرجات المحفوظة كاملة
+                for item in rubric_items:
                     item_score = rec.get(f"{item['id']}_score", 0)
                     badge_class = f"badge-{item_score}" if item_score in [1, 2, 3, 4, 5] else "badge-5"
                     
@@ -645,7 +683,7 @@ with tab2:
                 # إجراء التعديل
                 if show_edit or st.session_state.get(f'editing_v7_{rec_id}'):
                     st.session_state[f'editing_v7_{rec_id}'] = True
-                    st.markdown("---")
+                    st.markdown("---\n")
                     st.subheader("✏️ نموذج تعديل الاستمارة")
                     
                     with st.form(f"edit_form_v7_{rec_id}"):
